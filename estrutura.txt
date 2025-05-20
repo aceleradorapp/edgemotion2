@@ -1,0 +1,32 @@
+|-- package-lock.json
+|-- package.json
++-- public
+|-- README.md
++-- seeders
+|   |-- seedProfiles.js
+|   |-- seedUserTypes.js
+|-- server.js
++-- src
+|   +-- config
+|   |   |-- sequelize.js
+|   +-- controllers
+|   |   |-- authController.js
+|   |   |-- profileController.js
+|   |   |-- userTypeController.js
+|   +-- middlewares
+|   |   |-- authMiddleware.js
+|   |   |-- authorizeMiddleware.js
+|   +-- models
+|   |   |-- index.js
+|   |   |-- Profile.js
+|   |   |-- User.js
+|   |   |-- UserType.js
+|   +-- routes
+|   |   |-- authRoutes.js
+|   |   |-- profileRoutes.js
+|   |   |-- protectedRoutes.js
+|   |   |-- userTypeRoutes.js
+|   +-- services
+|   +-- utils
++-- uploads
+|-- _
