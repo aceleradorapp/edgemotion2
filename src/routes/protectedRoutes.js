@@ -7,7 +7,7 @@ const authorize = require('../middlewares/authorizeMiddleware');
 router.get(
   '/admin-area',
   authenticateToken,
-  authorize({ allowedUserTypes: [1] }),
+  authorize({ allowedUserTypes: [1], allowedProfiles: [1] }),
   (req, res) => {
     res.json({ message: 'Área administrativa acessada com sucesso' });
   }

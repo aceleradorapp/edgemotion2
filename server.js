@@ -5,6 +5,9 @@ const authRoutes = require('./src/routes/authRoutes');
 const protectedRoutes = require('./src/routes/protectedRoutes');
 const userTypeRoutes = require('./src/routes/userTypeRoutes');
 const profileRoutes = require('./src/routes/profileRoutes');
+const projectRoutes = require('./src/routes/projectRoutes');
+const toolInstanceRoutes = require('./src/routes/toolInstanceRoutes');
+const toolResultRoutes = require('./src/routes/toolResultRoutes');
 
 
 const app = express();
@@ -17,6 +20,9 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/user-types', userTypeRoutes);
 app.use('/api/profiles', profileRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/tools', toolInstanceRoutes);
+app.use('/api/results', toolResultRoutes);
 app.use('/api', protectedRoutes);
 
 // Teste
