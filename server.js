@@ -1,13 +1,17 @@
 require('dotenv').config();
 const express = require('express');
 
-const authRoutes = require('./src/routes/authRoutes');
+const projectParticipantRoutes = require('./src/routes/projectParticipantRoutes');
+const toolInstanceRoutes = require('./src/routes/toolInstanceRoutes');
+const toolResultRoutes = require('./src/routes/toolResultRoutes');
+const sharedLinkRoutes = require('./src/routes/sharedLinkRoutes');
 const protectedRoutes = require('./src/routes/protectedRoutes');
 const userTypeRoutes = require('./src/routes/userTypeRoutes');
 const profileRoutes = require('./src/routes/profileRoutes');
 const projectRoutes = require('./src/routes/projectRoutes');
-const toolInstanceRoutes = require('./src/routes/toolInstanceRoutes');
-const toolResultRoutes = require('./src/routes/toolResultRoutes');
+const groupRoutes = require('./src/routes/groupRoutes');
+const groupParticipantRoutes = require('./src/routes/groupParticipantRoutes');
+const authRoutes = require('./src/routes/authRoutes');
 
 
 const app = express();
@@ -23,6 +27,10 @@ app.use('/api/profiles', profileRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/tools', toolInstanceRoutes);
 app.use('/api/results', toolResultRoutes);
+app.use('/api/participants', projectParticipantRoutes);
+app.use('/api/groups', groupRoutes);
+app.use('/api/group-participants', groupParticipantRoutes);
+app.use('/api/shared-links', sharedLinkRoutes);
 app.use('/api', protectedRoutes);
 
 // Teste
@@ -37,7 +45,8 @@ const db = require('./src/models');
 db.sequelize.authenticate()
   .then(() => {
     console.log('Conexão com banco de dados estabelecida com sucesso.');
-    return db.sequelize.sync({ alter: true });
+    //return db.sequelize.sync({ alter: true });
+     return db.sequelize.sync();
   })
   .then(() => {
     console.log('Tabelas sincronizadas com sucesso!');
