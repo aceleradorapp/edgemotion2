@@ -1,5 +1,8 @@
 require('dotenv').config();
 const express = require('express');
+const YAML = require('yamljs');
+const path = require('path');
+const swaggerUi = require('swagger-ui-express');
 
 const projectParticipantRoutes = require('./src/routes/projectParticipantRoutes');
 const toolInstanceRoutes = require('./src/routes/toolInstanceRoutes');
@@ -13,6 +16,7 @@ const groupRoutes = require('./src/routes/groupRoutes');
 const groupParticipantRoutes = require('./src/routes/groupParticipantRoutes');
 const authRoutes = require('./src/routes/authRoutes');
 
+const swaggerDocument = YAML.load(path.join(__dirname, 'openapi.yaml'));
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -33,9 +37,13 @@ app.use('/api/group-participants', groupParticipantRoutes);
 app.use('/api/shared-links', sharedLinkRoutes);
 app.use('/api', protectedRoutes);
 
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+
 // Teste
 app.get('/', (req, res) => {
-  res.send('EdgeMotion API rodando com sucesso!');
+  res.send('EdgeMotion API rodando com sucesso! Acesse http://localhost:3030/api-docs/ para documentação');
 });
 
 // Banco de Dados

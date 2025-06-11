@@ -1,0 +1,1259 @@
+openapi: 3.0.0
+info:
+  title: EdgeMotion 2.0 API  .             
+  version: 2.0.0
+  description: |
+    - Dev: Michael Milanez.
+    
+    Esta API permite a gestão completa de projetos, ferramentas, resultados, participantes, grupos e links compartilhados para a plataforma EdgeMotion 2.0.
+    Também inclui rotas para autenticação de usuários, gestão de tipos de usuário e perfis.
+    
+    A autenticação é feita via Bearer Token (JWT) para a maioria das rotas de gestão, enquanto algumas rotas públicas (como login e acesso a links compartilhados) não exigem autenticação.
+servers:
+  - url: http://localhost:3030/api
+    description: Servidor Local de Desenvolvimento
+  - url: http://192.188.12.22:3030/api
+    description: Servidor Homologação  
+
+tags:
+  - name: Autenticação
+    description: Rotas para registro e login de usuários.
+  - name: Dashboard e Admin
+    description: Rotas de acesso ao dashboard e área administrativa.
+  - name: Tipos de Usuário
+    description: Gerenciamento de tipos de usuário (ex: Desenvolvedor, Administrador).
+  - name: Perfis de Usuário
+    description: Gerenciamento de perfis de usuário.
+  - name: Projetos
+    description: Operações relacionadas à gestão de projetos.
+  - name: Ferramentas
+    description: Gerenciamento de ferramentas (quizzes, apresentações, etc.) dentro dos projetos.
+  - name: Resultados das Ferramentas
+    description: Registro e consulta de resultados de ferramentas por participantes.
+  - name: Participantes
+    description: Gerenciamento de participantes (usuários registrados ou visitantes) em projetos.
+  - name: Grupos
+    description: Criação e listagem de grupos dentro dos projetos.
+  - name: Participantes de Grupo
+    description: Gerenciamento da associação de usuários a grupos.
+  - name: Links Compartilhados
+    description: Criação e acesso a links públicos para projetos.
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Autenticação via token JWT. Inclua o token no cabeçalho 'Authorization' como 'Bearer <YOUR_TOKEN>'.
+  schemas:
+    Project:
+      type: object
+      properties:
+        name:
+          type: string
+          description: O nome do projeto.
+        description:
+          type: string
+          description: Uma descrição detalhada do projeto.
+      required:
+        - name
+        - description
+    Tool:
+      type: object
+      properties:
+        projectId:
+          type: integer
+          format: int64
+          description: O ID do projeto ao qual a ferramenta pertence.
+        toolType:
+          type: string
+          description: O tipo da ferramenta (ex: "quiz-alternativas", "drag-drop").
+        title:
+          type: string
+          description: O título da ferramenta.
+        description:
+          type: string
+          description: Uma descrição da ferramenta.
+        dataUrl:
+          type: string
+          format: url
+          description: A URL para os dados da ferramenta (ex: o JSON das perguntas do quiz).
+        order:
+          type: integer
+          description: A ordem de exibição da ferramenta dentro do projeto.
+      required:
+        - projectId
+        - toolType
+        - title
+        - description
+        - dataUrl
+        - order
+    ToolResult:
+      type: object
+      properties:
+        toolInstanceId:
+          type: integer
+          format: int64
+          description: O ID da instância da ferramenta a que este resultado se refere.
+        participantId:
+          type: integer
+          format: int64
+          description: O ID do participante que gerou este resultado.
+        score:
+          type: integer
+          description: A pontuação obtida pelo participante nesta ferramenta.
+        completedAt:
+          type: string
+          format: date-time
+          description: O timestamp de quando o participante completou a ferramenta.
+        duration:
+          type: integer
+          description: A duração em segundos que o participante levou para completar a ferramenta.
+        answers:
+          type: object
+          additionalProperties:
+            type: string
+          description: Um objeto JSON contendo as respostas dadas pelo participante.
+          example:
+            pergunta1: "A"
+            pergunta2: "B"
+      required:
+        - toolInstanceId
+        - participantId
+        - score
+        - completedAt
+        - duration
+        - answers
+    Participant:
+      type: object
+      description: Representa um participante que pode ser um usuário registrado ou um visitante.
+      properties:
+        projectId:
+          type: integer
+          format: int64
+          description: O ID do projeto ao qual o participante está associado.
+        userId:
+          type: integer
+          format: int64
+          description: O ID do usuário registrado (exclusivo para participantes de usuário).
+        guestEmail:
+          type: string
+          format: email
+          description: O e-mail do visitante (exclusivo para participantes visitantes).
+      oneOf:
+        - required: [projectId, userId]
+        - required: [projectId, guestEmail]
+      discriminator:
+        propertyName: type # Not explicitly defined in your JSON, but useful for oneOf
+    ParticipantStatusUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          description: O novo status do participante.
+          enum: [finalizado, ativo, pendente]
+      required:
+        - status
+    Group:
+      type: object
+      properties:
+        projectId:
+          type: integer
+          format: int64
+          description: O ID do projeto ao qual o grupo pertence.
+        name:
+          type: string
+          description: O nome do grupo.
+        description:
+          type: string
+          description: Uma descrição do grupo.
+      required:
+        - projectId
+        - name
+        - description
+    GroupParticipant:
+      type: object
+      properties:
+        groupId:
+          type: integer
+          format: int64
+          description: O ID do grupo ao qual o usuário será adicionado.
+        userId:
+          type: integer
+          format: int64
+          description: O ID do usuário a ser adicionado ao grupo.
+      required:
+        - groupId
+        - userId
+    SharedLink:
+      type: object
+      properties:
+        projectId:
+          type: integer
+          format: int64
+          description: O ID do projeto para o qual o link de compartilhamento será gerado.
+        expiresAt:
+          type: string
+          format: date-time
+          description: A data e hora de expiração do link compartilhado.
+      required:
+        - projectId
+        - expiresAt
+    UserRegister:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: O endereço de e-mail do novo usuário.
+        password:
+          type: string
+          description: A senha do novo usuário.
+        displayName:
+          type: string
+          description: O nome de exibição do novo usuário.
+      required:
+        - email
+        - password
+        - displayName
+    UserLogin:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: O endereço de e-mail do usuário para login.
+        password:
+          type: string
+          description: A senha do usuário para login.
+      required:
+        - email
+        - password
+    UserType:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: O código único para o tipo de usuário.
+        name:
+          type: string
+          description: O nome do tipo de usuário (ex: "Administrador", "Aluno").
+        description:
+          type: string
+          description: Uma descrição detalhada do tipo de usuário e suas permissões.
+      required:
+        - code
+        - name
+        - description
+    Profile:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: O código único para o perfil de usuário.
+        name:
+          type: string
+          description: O nome do perfil (ex: "Gerente de Projeto", "Instrutor").
+        description:
+          type: string
+          description: Uma descrição detalhada do perfil e suas responsabilidades.
+      required:
+        - code
+        - name
+        - description
+
+paths:
+  /projects:
+    post:
+      tags:
+        - Projetos
+      summary: Criar um novo projeto
+      description: Permite a criação de um novo projeto na plataforma, definindo seu nome e descrição.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Project'
+            example:
+              name: "Projeto de Treinamento 2"
+              description: "Projeto com quizzes e apresentações 2"
+      responses:
+        '201':
+          description: Projeto criado com sucesso. Retorna os detalhes do projeto criado.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '400':
+          description: Requisição inválida - Dados do projeto ausentes ou incorretos.
+    get:
+      tags:
+        - Projetos
+      summary: Listar todos os projetos
+      description: Retorna uma lista de todos os projetos disponíveis para o usuário autenticado.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de projetos retornada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+  /projects/{id}:
+    get:
+      tags:
+        - Projetos
+      summary: Obter detalhes de um projeto por ID
+      description: Retorna os detalhes de um projeto específico utilizando seu ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            format: int64
+          required: true
+          description: ID do projeto a ser recuperado.
+      responses:
+        '200':
+          description: Detalhes do projeto.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '404':
+          description: Projeto não encontrado com o ID fornecido.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+    put:
+      tags:
+        - Projetos
+      summary: Atualizar um projeto por ID
+      description: Atualiza as informações de um projeto existente (nome e descrição) utilizando seu ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            format: int64
+          required: true
+          description: ID do projeto a ser atualizado.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Project'
+            example:
+              name: "Projeto Atualizado 3"
+              description: "Descrição atualizada do projeto"
+      responses:
+        '200':
+          description: Projeto atualizado com sucesso. Retorna os detalhes atualizados.
+        '404':
+          description: Projeto não encontrado com o ID fornecido.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '400':
+          description: Requisição inválida - Dados de atualização ausentes ou incorretos.
+    delete:
+      tags:
+        - Projetos
+      summary: Deletar um projeto por ID
+      description: Remove um projeto permanentemente utilizando seu ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            format: int64
+          required: true
+          description: ID do projeto a ser deletado.
+      responses:
+        '204':
+          description: Projeto deletado com sucesso. Nenhuma resposta de conteúdo.
+        '404':
+          description: Projeto não encontrado com o ID fornecido.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+
+  /tools:
+    post:
+      tags:
+        - Ferramentas
+      summary: Criar uma nova ferramenta
+      description: Adiciona uma nova ferramenta (ex: quiz, apresentação) a um projeto específico.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tool'
+            example:
+              projectId: 1
+              toolType: "quiz-alternativas"
+              title: "Quiz de Exemplo"
+              description: "Quiz com perguntas de múltiplas escolhas"
+              dataUrl: "https://meuarquivo.com/dados/quiz1"
+              order: 1
+      responses:
+        '201':
+          description: Ferramenta criada com sucesso. Retorna os detalhes da ferramenta criada.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '400':
+          description: Requisição inválida - Dados da ferramenta ausentes ou incorretos.
+    get:
+      tags:
+        - Ferramentas
+      summary: Listar todas as ferramentas de um usuário
+      description: Retorna uma lista de todas as ferramentas associadas aos projetos do usuário autenticado.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de ferramentas retornada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tool'
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+
+  /tools/project/{projectId}:
+    get:
+      tags:
+        - Ferramentas
+      summary: Listar ferramentas por ID de projeto
+      description: Retorna todas as ferramentas pertencentes a um projeto específico, identificado pelo seu ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: projectId
+          schema:
+            type: integer
+            format: int64
+          required: true
+          description: O ID do projeto cujas ferramentas serão listadas.
+      responses:
+        '200':
+          description: Lista de ferramentas para o projeto especificado.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tool'
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '404':
+          description: Projeto não encontrado ou sem ferramentas associadas.
+
+  /tools/{id}:
+    put:
+      tags:
+        - Ferramentas
+      summary: Atualizar uma ferramenta por ID
+      description: Atualiza as informações de uma ferramenta existente (tipo, título, descrição, URL de dados, ordem) utilizando seu ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            format: int64
+          required: true
+          description: ID da ferramenta a ser atualizada.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tool'
+            example:
+              toolType: "drag-drop"
+              title: "Quiz Atualizado"
+              description: "Novo quiz com interação de arrastar e soltar"
+              dataUrl: "https://meuarquivo.com/dados/quiz2"
+              order: 2
+      responses:
+        '200':
+          description: Ferramenta atualizada com sucesso. Retorna os detalhes atualizados.
+        '404':
+          description: Ferramenta não encontrada com o ID fornecido.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '400':
+          description: Requisição inválida - Dados de atualização ausentes ou incorretos.
+    delete:
+      tags:
+        - Ferramentas
+      summary: Deletar uma ferramenta por ID
+      description: Remove uma ferramenta permanentemente utilizando seu ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            format: int64
+          required: true
+          description: ID da ferramenta a ser deletada.
+      responses:
+        '204':
+          description: Ferramenta deletada com sucesso. Nenhuma resposta de conteúdo.
+        '404':
+          description: Ferramenta não encontrada com o ID fornecido.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+
+  /results:
+    post:
+      tags:
+        - Resultados das Ferramentas
+      summary: Criar um novo resultado de ferramenta
+      description: Registra um resultado de uma ferramenta para um participante específico.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ToolResult'
+            example:
+              toolInstanceId: 1
+              participantId: 1
+              score: 95
+              completedAt: "2025-05-22T14:00:00Z"
+              duration: 180
+              answers:
+                pergunta1: "A"
+                pergunta2: "B"
+      responses:
+        '201':
+          description: Resultado criado com sucesso.
+        '400':
+          description: Requisição inválida - Dados do resultado ausentes ou incorretos.
+
+  /results/tool/{toolInstanceId}:
+    get:
+      tags:
+        - Resultados das Ferramentas
+      summary: Encontrar resultados de uma ferramenta específica
+      description: Retorna todos os resultados registrados para uma determinada instância de ferramenta.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: toolInstanceId
+          schema:
+            type: integer
+            format: int64
+          required: true
+          description: ID da instância da ferramenta.
+      responses:
+        '200':
+          description: Lista de resultados para a ferramenta especificada.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ToolResult'
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '404':
+          description: Instância da ferramenta não encontrada ou sem resultados.
+
+  /results/participant/{participantId}:
+    get:
+      tags:
+        - Resultados das Ferramentas
+      summary: Encontrar resultados de um participante específico
+      description: Retorna todos os resultados de ferramentas para um participante específico.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: participantId
+          schema:
+            type: integer
+            format: int64
+          required: true
+          description: ID do participante.
+      responses:
+        '200':
+          description: Lista de resultados para o participante especificado.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ToolResult'
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '404':
+          description: Participante não encontrado ou sem resultados.
+
+  /participants:
+    post:
+      tags:
+        - Participantes
+      summary: Criar um novo participante (usuário ou visitante)
+      description: Cria um novo participante para um projeto, que pode ser um usuário já registrado ou um visitante (guest) com e-mail.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Participant'
+            examples:
+              userParticipant:
+                summary: Participante Usuário
+                value:
+                  projectId: 1
+                  userId: 1
+              guestParticipant:
+                summary: Participante Visitante
+                value:
+                  projectId: 1
+                  guestEmail: "convidadoundefined" # Exemplo de email de visitante
+      responses:
+        '201':
+          description: Participante criado com sucesso.
+        '400':
+          description: Requisição inválida - Dados do participante ausentes ou incorretos.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+
+  /participants/project/{projectId}:
+    get:
+      tags:
+        - Participantes
+      summary: Listar participantes de um projeto
+      description: Retorna uma lista de todos os participantes (usuários e visitantes) associados a um projeto específico.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: projectId
+          schema:
+            type: integer
+            format: int64
+          required: true
+          description: ID do projeto cujos participantes serão listados.
+      responses:
+        '200':
+          description: Lista de participantes do projeto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Participant'
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '404':
+          description: Projeto não encontrado ou sem participantes associados.
+
+  /participants/{id}/status:
+    put:
+      tags:
+        - Participantes
+      summary: Atualizar o status de um participante
+      description: Atualiza o status de um participante (ex: para "finalizado") utilizando seu ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            format: int64
+          required: true
+          description: ID do participante a ter o status atualizado.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParticipantStatusUpdate'
+            example:
+              status: "finalizado"
+      responses:
+        '200':
+          description: Status do participante atualizado com sucesso.
+        '404':
+          description: Participante não encontrado com o ID fornecido.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '400':
+          description: Requisição inválida - Status ausente ou incorreto.
+
+  /participants/token/{token}:
+    get:
+      tags:
+        - Participantes
+      summary: Listar participante por token
+      description: Retorna os detalhes de um participante utilizando seu token de acesso. Esta rota é pública.
+      parameters:
+        - in: path
+          name: token
+          schema:
+            type: string
+          required: true
+          description: O token do participante.
+      responses:
+        '200':
+          description: Detalhes do participante.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Participant' # Assumindo que retorna a mesma estrutura de um participante
+        '404':
+          description: Token não encontrado ou inválido.
+
+  /groups:
+    post:
+      tags:
+        - Grupos
+      summary: Criar um novo grupo
+      description: Cria um novo grupo dentro de um projeto específico, com nome e descrição.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+            example:
+              projectId: 1
+              name: "Grupo A"
+              description: "Grupo para colaboradores do setor A"
+      responses:
+        '201':
+          description: Grupo criado com sucesso.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '400':
+          description: Requisição inválida - Dados do grupo ausentes ou incorretos.
+
+  /groups/project/{projectId}:
+    get:
+      tags:
+        - Grupos
+      summary: Listar grupos de um projeto
+      description: Retorna uma lista de todos os grupos pertencentes a um projeto específico.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: projectId
+          schema:
+            type: integer
+            format: int64
+          required: true
+          description: ID do projeto cujos grupos serão listados.
+      responses:
+        '200':
+          description: Lista de grupos do projeto.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '404':
+          description: Projeto não encontrado ou sem grupos associados.
+
+  /group-participants:
+    post:
+      tags:
+        - Participantes de Grupo
+      summary: Adicionar usuário a um grupo
+      description: Associa um usuário a um grupo existente.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupParticipant'
+            example:
+              groupId: 1
+              userId: 1
+      responses:
+        '201':
+          description: Usuário adicionado ao grupo com sucesso.
+        '400':
+          description: Requisição inválida - IDs de grupo/usuário ausentes ou incorretos.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+
+  /group-participants/{groupId}:
+    get:
+      tags:
+        - Participantes de Grupo
+      summary: Listar participantes para um grupo
+      description: Retorna uma lista de todos os usuários que são membros de um grupo específico.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: groupId
+          schema:
+            type: integer
+            format: int64
+          required: true
+          description: ID do grupo cujos participantes serão listados.
+      responses:
+        '200':
+          description: Lista de participantes para o grupo especificado.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object # Pode ser uma estrutura mais simples, ou a própria User
+                  properties:
+                    id:
+                      type: integer
+                    email:
+                      type: string
+                    displayName:
+                      type: string
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '404':
+          description: Grupo não encontrado ou sem participantes associados.
+
+  /shared-links:
+    post:
+      tags:
+        - Links Compartilhados
+      summary: Criar um novo link compartilhado
+      description: Gera um link público para um projeto, permitindo acesso sem autenticação até a data de expiração.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SharedLink'
+            example:
+              projectId: 1
+              expiresAt: "2025-12-31T23:59:59Z"
+      responses:
+        '201':
+          description: Link compartilhado criado com sucesso. Retorna o token do link.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '400':
+          description: Requisição inválida - Dados do link ausentes ou incorretos.
+
+  /shared-links/{token}:
+    get:
+      tags:
+        - Links Compartilhados
+      summary: Acessar um link público compartilhado
+      description: Permite o acesso a um projeto ou recurso através de um link compartilhado, sem necessidade de autenticação.
+      parameters:
+        - in: path
+          name: token
+          schema:
+            type: string
+          required: true
+          description: O token único do link compartilhado.
+      responses:
+        '200':
+          description: Conteúdo do link compartilhado (ex: detalhes do projeto e ferramentas).
+        '404':
+          description: Link não encontrado, expirado ou inválido.
+
+  /auth/register:
+    post:
+      tags:
+        - Autenticação
+      summary: Registrar um novo usuário
+      description: Cria uma nova conta de usuário no sistema.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegister'
+            example:
+              email: "michael@example.com.br"
+              password: "123456"
+              displayName: "Michael"
+      responses:
+        '201':
+          description: Usuário registrado com sucesso.
+        '400':
+          description: Dados de registro inválidos (ex: e-mail já em uso, senha fraca).
+
+  /auth/login:
+    post:
+      tags:
+        - Autenticação
+      summary: Logar um usuário e obter token
+      description: Autentica um usuário e retorna um token JWT para acesso a rotas protegidas.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+            example:
+              email: "michael@example.com.br"
+              password: "123456"
+      responses:
+        '200':
+          description: Login bem-sucedido, retorna o token JWT.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: Token JWT para autenticação.
+        '401':
+          description: Credenciais inválidas (e-mail ou senha incorretos).
+
+  /dashboard:
+    get:
+      tags:
+        - Dashboard e Admin
+      summary: Acessar o dashboard
+      description: Retorna dados e estatísticas para exibição no dashboard do usuário autenticado.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dados do dashboard retornados com sucesso.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+
+  /admin-area:
+    get:
+      tags:
+        - Dashboard e Admin
+      summary: Acessar a área de administração
+      description: Retorna dados e funcionalidades específicas para usuários com perfil de administrador.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dados da área de administração retornados com sucesso.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '403':
+          description: Acesso proibido - O usuário não tem permissões de administrador.
+
+  /auth/me:
+    get:
+      tags:
+        - Autenticação
+      summary: Obter informações do usuário logado
+      description: Retorna os detalhes do perfil do usuário atualmente autenticado.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Informações do usuário retornadas com sucesso.
+          content:
+            application/json:
+              schema:
+                type: object # Substituir por schema de usuário real se disponível
+                properties:
+                  id:
+                    type: integer
+                  email:
+                    type: string
+                  displayName:
+                    type: string
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+
+  /user-types:
+    post:
+      tags:
+        - Tipos de Usuário
+      summary: Criar um novo tipo de usuário
+      description: Adiciona uma nova categoria de tipo de usuário com um código, nome e descrição.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserType'
+            example:
+              code: 10
+              name: "Develop_2"
+              description: "Acesso ao sistema"
+      responses:
+        '201':
+          description: Tipo de usuário criado com sucesso.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '400':
+          description: Requisição inválida - Dados do tipo de usuário ausentes ou incorretos.
+    get:
+      tags:
+        - Tipos de Usuário
+      summary: Listar todos os tipos de usuário
+      description: Retorna uma lista de todos os tipos de usuário registrados no sistema.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de tipos de usuário retornada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserType'
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+
+  /user-types/{id}:
+    get:
+      tags:
+        - Tipos de Usuário
+      summary: Obter tipo de usuário por ID
+      description: Retorna os detalhes de um tipo de usuário específico utilizando seu ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            format: int64
+          required: true
+          description: ID do tipo de usuário a ser recuperado.
+      responses:
+        '200':
+          description: Detalhes do tipo de usuário.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserType'
+        '404':
+          description: Tipo de usuário não encontrado com o ID fornecido.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+    put:
+      tags:
+        - Tipos de Usuário
+      summary: Atualizar tipo de usuário por ID
+      description: Atualiza as informações (código, nome, descrição) de um tipo de usuário existente utilizando seu ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            format: int64
+          required: true
+          description: ID do tipo de usuário a ser atualizado.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserType'
+            example:
+              code: 10
+              name: "Develop_2"
+              description: "Acesso ao sistema"
+      responses:
+        '200':
+          description: Tipo de usuário atualizado com sucesso.
+        '404':
+          description: Tipo de usuário não encontrado com o ID fornecido.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '400':
+          description: Requisição inválida - Dados de atualização ausentes ou incorretos.
+    delete:
+      tags:
+        - Tipos de Usuário
+      summary: Deletar tipo de usuário por ID
+      description: Remove um tipo de usuário permanentemente utilizando seu ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            format: int64
+          required: true
+          description: ID do tipo de usuário a ser deletado.
+      responses:
+        '204':
+          description: Tipo de usuário deletado com sucesso. Nenhuma resposta de conteúdo.
+        '404':
+          description: Tipo de usuário não encontrado com o ID fornecido.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+
+  /profiles:
+    post:
+      tags:
+        - Perfis de Usuário
+      summary: Criar um novo perfil de usuário
+      description: Adiciona um novo perfil de usuário com um código, nome e descrição.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+            example:
+              code: 10
+              name: "Develop_2"
+              description: "Acesso ao sistema"
+      responses:
+        '201':
+          description: Perfil de usuário criado com sucesso.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '400':
+          description: Requisição inválida - Dados do perfil ausentes ou incorretos.
+    get:
+      tags:
+        - Perfis de Usuário
+      summary: Listar todos os perfis de usuário
+      description: Retorna uma lista de todos os perfis de usuário registrados no sistema.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de perfis de usuário retornada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Profile'
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+
+  /profiles/{id}:
+    get:
+      tags:
+        - Perfis de Usuário
+      summary: Obter perfil de usuário por ID
+      description: Retorna os detalhes de um perfil de usuário específico utilizando seu ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            format: int64
+          required: true
+          description: ID do perfil de usuário a ser recuperado.
+      responses:
+        '200':
+          description: Detalhes do perfil de usuário.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        '404':
+          description: Perfil de usuário não encontrado com o ID fornecido.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+    put:
+      tags:
+        - Perfis de Usuário
+      summary: Atualizar perfil de usuário por ID
+      description: Atualiza as informações (código, nome, descrição) de um perfil de usuário existente utilizando seu ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            format: int64
+          required: true
+          description: ID do perfil de usuário a ser atualizado.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+            example:
+              code: 10
+              name: "Develop_2"
+              description: "Acesso ao sistema"
+      responses:
+        '200':
+          description: Perfil de usuário atualizado com sucesso.
+        '404':
+          description: Perfil de usuário não encontrado com o ID fornecido.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '400':
+          description: Requisição inválida - Dados de atualização ausentes ou incorretos.
+    delete:
+      tags:
+        - Perfis de Usuário
+      summary: Deletar perfil de usuário por ID
+      description: Remove um perfil de usuário permanentemente utilizando seu ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            format: int64
+          required: true
+          description: ID do perfil de usuário a ser deletado.
+      responses:
+        '204':
+          description: Perfil de usuário deletado com sucesso. Nenhuma resposta de conteúdo.
+        '404':
+          description: Perfil de usuário não encontrado com o ID fornecido.
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
