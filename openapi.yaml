@@ -4,7 +4,7 @@ info:
   version: 2.0.0
   description: |
     - Dev: Michael Milanez.
-    
+
     Esta API permite a gestão completa de projetos, ferramentas, resultados, participantes, grupos e links compartilhados para a plataforma EdgeMotion 2.0.
     Também inclui rotas para autenticação de usuários, gestão de tipos de usuário e perfis.
     
@@ -38,6 +38,8 @@ tags:
     description: Gerenciamento da associação de usuários a grupos.
   - name: Links Compartilhados
     description: Criação e acesso a links públicos para projetos.
+  - name: Uploads
+    description: Uploads de arquivos.
 
 components:
   securitySchemes:
@@ -1257,3 +1259,108 @@ paths:
           description: Perfil de usuário não encontrado com o ID fornecido.
         '401':
           description: Não autorizado - Token JWT ausente ou inválido.
+  /upload/user: # O caminho da sua rota de upload
+    post:
+      tags:
+        - Uploads # Uma nova tag para organizar as operações de upload
+      summary: Upload de imagem de perfil de usuário
+      description: Faz o upload de uma imagem para o perfil de um usuário. Suporta arquivos JPG/JPEG, PNG e outros formatos de imagem.
+      security:
+        - bearerAuth: [] # Supondo que esta rota também requer autenticação
+      requestBody:
+        required: true
+        content:
+          multipart/form-data: # O tipo de conteúdo para upload de arquivos
+            schema:
+              type: object
+              properties:
+                image: # O nome do campo do formulário que conterá o arquivo
+                  type: string
+                  format: binary # Indica que é um arquivo binário
+                  description: O arquivo de imagem a ser enviado (JPG, PNG, etc.).
+            encoding:
+              image:
+                contentType: image/jpeg, image/png # Você pode especificar os tipos de mídia aceitos
+      responses:
+        '200':
+          description: Upload realizado com sucesso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Upload successful!"
+                  filePath:
+                    type: string
+                    example: "/uploads/users/profile_123.jpg" # Exemplo do caminho onde o arquivo foi salvo
+        '400':
+          description: Requisição inválida (ex: arquivo não fornecido, formato incorreto).
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '413':
+          description: Payload muito grande - Arquivo excede o tamanho máximo permitido.
+  /upload/user/images:
+    get:
+      tags:
+        - Uploads
+      summary: Lista as imagens de perfil do usuário
+      description: Retorna a lista de imagens armazenadas na pasta de uploads do usuário autenticado.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de imagens retornada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  images:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          example: "1749647625433-509039295.png"
+                        url:
+                          type: string
+                          example: "/uploads/users/1749647625433-509039295.png"
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '500':
+          description: Erro interno ao tentar listar imagens.
+  /upload/user/images/{filename}:
+    delete:
+      tags:
+        - Uploads
+      summary: Remove uma imagem do usuário
+      description: Deleta uma imagem específica da pasta de uploads do usuário autenticado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: filename
+          required: true
+          schema:
+            type: string
+          description: Nome do arquivo a ser removido (ex: `1749647625433-509039295.png`)
+      responses:
+        '200':
+          description: Imagem deletada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Imagem deletada com sucesso."
+        '401':
+          description: Não autorizado - Token JWT ausente ou inválido.
+        '404':
+          description: Imagem não encontrada.
+        '500':
+          description: Erro interno ao tentar deletar a imagem.

@@ -15,6 +15,7 @@ const projectRoutes = require('./src/routes/projectRoutes');
 const groupRoutes = require('./src/routes/groupRoutes');
 const groupParticipantRoutes = require('./src/routes/groupParticipantRoutes');
 const authRoutes = require('./src/routes/authRoutes');
+const uploadRoutes = require('./src/routes/uploadRoutes');
 
 const swaggerDocument = YAML.load(path.join(__dirname, 'openapi.yaml'));
 
@@ -35,9 +36,11 @@ app.use('/api/participants', projectParticipantRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/group-participants', groupParticipantRoutes);
 app.use('/api/shared-links', sharedLinkRoutes);
+app.use('/api/upload', uploadRoutes);
 app.use('/api', protectedRoutes);
 
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // acessar imagem via URL pública
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 
