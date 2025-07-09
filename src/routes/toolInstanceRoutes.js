@@ -9,7 +9,10 @@ router.use(authenticateToken);
 router.get('/', toolInstanceController.index);
 router.get('/project/:projectId', toolInstanceController.index); // listar ferramentas do projeto
 router.post('/', toolInstanceController.create); // criar ferramenta
+router.get('/:id', toolInstanceController.show);
 router.put('/:id', toolInstanceController.update); // atualizar ferramenta
 router.delete('/:id', toolInstanceController.delete); // deletar ferramenta
+router.get('/:id/data', toolInstanceController.readJson);    // ler JSON
+router.delete('/:id/data', toolInstanceController.deleteJson);
 
-module.exports = router;
+module.exports = router; 

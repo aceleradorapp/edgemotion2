@@ -29,6 +29,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true // Link pode ter validade
     },
+    keyword: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
     isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true

@@ -1,0 +1,49 @@
+
+.dialog-container{
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;;
+    width: 300px;
+    height: 100px;
+    padding: 0 010px;
+    border: 1px solid;
+    border-radius: 7px 7px 0 0;
+    border-color: var(--color-primary-dark);
+    right: 50px;
+    bottom: -110px;
+    color: var(--color-primary-dark);
+    background-color: var(--color-background-secondary);
+    box-shadow: 0 0 1em rgb(0 0 0 / 0.3);
+    z-index: 150;
+
+    transition: bottom 0.5s ease;
+}
+
+.dialog-container> span{
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    font-size: 26px;
+    color: var(--color-text-secondary);
+} 
+
+.dialog-container>.title{
+    font-size: 24px;
+    color: var(--color-accent);
+}
+
+.dialog-container>.message{
+    color: var(--color-text-secondary);
+    margin-bottom: 10px;
+}
+
+.dialog-container>.message>b{
+    color: var(--color-text-primary) !important;
+    font-size: 40px;
+}
+
+.dialog-container.show {
+    bottom: 78px;
+}

@@ -1,0 +1,60 @@
+/* Estilizando a div container-training */
+.container-list-training {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 5px;
+    border: 1px solid #535353;
+    margin: 10px;
+}
+
+.item-image {
+    width: 70px;
+    height: 53px;
+    margin-right: 20px;
+}
+
+.item-image img {
+    width: 100%;
+}
+
+.item-name {
+    flex-grow: 1;
+    font-size: 18px;
+}
+
+
+.item-action {
+    /* Adicione estilos desejados para a div item-action */
+}
+
+.item-action a {
+    text-decoration: none;
+}
+
+
+@media (max-width: 768px) {
+    .container-list-training {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-direction: column;
+        flex-wrap: wrap;
+        padding: 5px;
+        border: 1px solid #535353;
+        margin: 10px;
+    }
+
+    .item-image {
+        width: 93%;
+        height: auto;
+        margin-right: 0px;
+    }
+
+    .item-action {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+}

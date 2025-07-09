@@ -1,0 +1,12 @@
+const express = require('express');
+const router = express.Router();
+const userController = require('../controllers/userController');
+const authenticateToken = require('../middlewares/authMiddleware');
+
+
+router.post('/users/company', authenticateToken, userController.register);
+router.get('/users/company', authenticateToken, userController.listAllByCompany);
+router.put('/users/company/:guid', authenticateToken, userController.update);
+router.delete('/users/company/:guid', authenticateToken, userController.delete);
+
+module.exports = router;

@@ -10,6 +10,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       unique: true,
     },
+    companyGuid: {
+      type: DataTypes.UUID,
+      allowNull: true // ou false, depende da regra
+    },
     email: { type: DataTypes.STRING, allowNull: false, unique: true },
     password: { type: DataTypes.STRING, allowNull: false },
     displayName: { type: DataTypes.STRING },

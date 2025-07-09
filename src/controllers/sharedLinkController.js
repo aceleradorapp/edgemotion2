@@ -6,7 +6,7 @@ module.exports = {
   // Criar link de compartilhamento
   async create(req, res) {
     try {
-      const { projectId, expiresAt } = req.body;
+      const { projectId, expiresAt, keyword } = req.body;
 
       const project = await Project.findOne({ where: { id: projectId, userId: req.user.id } });
       if (!project) {
@@ -19,6 +19,7 @@ module.exports = {
         projectId,
         userId: req.user.id,
         linkCode,
+        keyword,
         expiresAt: expiresAt || null,
         isActive: true
       });
@@ -30,6 +31,26 @@ module.exports = {
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Erro ao criar link de compartilhamento.' });
+    }
+  },
+
+   async getAll(req, res) {
+    try {      
+
+      const link = await SharedLink.findAll({ where: { isActive: true } });
+
+      if (!link) {
+        return res.status(404).json({ error: 'Link inválido ou inativo.' });
+      }
+
+      if (link.expiresAt && new Date(link.expiresAt) < new Date()) {
+        return res.status(410).json({ error: 'Link expirado.' });
+      }
+
+      res.json(link);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Erro ao buscar link.' });
     }
   },
 
@@ -53,5 +74,35 @@ module.exports = {
       console.error(error);
       res.status(500).json({ error: 'Erro ao buscar link.' });
     }
+  },
+
+  async getKeywordByGuid(req, res) {
+    try {
+      const { guid } = req.params;
+
+      const link = await SharedLink.findOne({
+        where: {
+          guid,
+          isActive: true
+        }
+      });
+
+      if (!link) {
+        return res.status(404).json({ error: 'Link inválido ou inativo.' });
+      }
+
+      console.log('Agora:', new Date());
+      console.log('expiresAt:', new Date(link.expiresAt));
+
+      if (link.expiresAt && new Date(link.expiresAt) < new Date()) {
+        return res.status(410).json({ error: 'Link expirado.' });
+      }
+
+      res.json({ keyword: link.keyword });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Erro ao buscar keyword pelo GUID.' });
+    }
   }
+
 };

@@ -34,5 +34,62 @@ module.exports = {
       console.error(error);
       res.status(500).json({ error: 'Erro ao listar grupos.' });
     }
+  },
+
+  async update(req, res) {
+    try {
+      const { id } = req.params;
+      const { name, description } = req.body;
+
+      // Busca o grupo com join no projeto do usuário autenticado
+      const group = await Group.findOne({
+        where: { id },
+        include: {
+          model: Project,
+          where: { userId: req.user.id },
+          attributes: [] // não traz os dados do projeto
+        }
+      });
+
+      if (!group) {
+        return res.status(403).json({ error: 'Grupo não encontrado ou sem permissão.' });
+      }
+
+      group.name = name ?? group.name;
+      group.description = description ?? group.description;
+      await group.save();
+
+      res.json({ message: 'Grupo atualizado com sucesso.', group });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Erro ao atualizar grupo.' });
+    }
+  },
+
+  async delete(req, res) {
+  try {
+    const { id } = req.params;
+
+    const group = await Group.findOne({
+      where: { id },
+      include: {
+        model: Project,
+        where: { userId: req.user.id },
+        attributes: []
+      }
+    });
+
+    if (!group) {
+      return res.status(403).json({ error: 'Grupo não encontrado ou sem permissão.' });
+    }
+
+    await group.destroy();
+    res.json({ message: 'Grupo deletado com sucesso.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao deletar grupo.' });
   }
+}
+
+
 };

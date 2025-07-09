@@ -1,0 +1,140 @@
+:root {
+    /* Cores primárias */
+    --color-primary: #007acc;
+    --color-primary-dark: #0062a0;
+    --color-primary-light: #55b4d4;
+    --color-cyan: #007acc;
+
+    /* Cores de texto */
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #a1a1a1;
+
+    /* Cores de fundo */
+    --color-background-primary: #ffffff;
+    --color-background-secondary: #f5f5f5;
+
+    /* Cores de destaque */
+    --color-accent: #ffbb00;
+    --color-accent-dark: #eaa100;
+}
+
+.color-primary {
+    color: var(--color-primary);
+}
+
+.background-primary {
+    background-color: var(--color-primary);
+}
+
+.color-primary-dark {
+    color: var(--color-primary-dark);
+}
+
+.background-primary-dark {
+    background-color: var(--color-primary-dark);
+}
+
+.color-primary-light {
+    color: var(--color-primary-light);
+}
+
+.background-primary-light {
+    background-color: var(--color-primary-light);
+}
+
+.color-cyan {
+    color: var(--color-cyan);
+}
+
+.background-cyan {
+    background-color: var(--color-cyan);
+}
+
+.color-text-primary {
+    color: var(--color-text-primary);
+}
+
+.color-text-secondary {
+    color: var(--color-text-secondary);
+}
+
+.background-text-primary {
+    background-color: var(--color-text-primary);
+}
+
+.background-text-secondary {
+    background-color: var(--color-text-secondary);
+}
+
+.color-background-primary {
+    color: var(--color-background-primary);
+}
+
+.background-background-primary {
+    background-color: var(--color-background-primary);
+}
+
+.color-background-secondary {
+    color: var(--color-background-secondary);
+}
+
+.background-background-secondary {
+    background-color: var(--color-background-secondary);
+}
+
+.color-accent {
+    color: var(--color-accent);
+}
+
+.background-accent {
+    background-color: var(--color-accent);
+}
+
+.color-accent-dark {
+    color: var(--color-accent-dark);
+}
+
+.background-accent-dark {
+    background-color: var(--color-accent-dark);
+}
+
+/* Cores dos botões */
+
+.button-primary {
+    color: var(--color-text-primary);
+    background-color: var(--color-primary);
+}
+
+.button-secondary {
+    color: var(--color-text-primary);
+    background-color: var(--color-primary-dark);
+}
+
+.button-cyan-dark {
+    color: var(--color-background-primary);
+    background-color: var(--color-cyan);
+}
+
+.button-cyan-light {
+    color: var(--color-background-secondary);
+    background-color: var(--color-cyan);
+}
+
+.button-light {
+    color: var(--color-text-primary);
+    background-color: var(--color-primary-light);
+}
+
+.button-accent {
+    color: var(--color-text-primary);
+    background-color: var(--color-accent);
+}
+
+.button-accent-dark {
+    color: var(--color-text-primary);
+    background-color: var(--color-accent-dark);
+}
+
+.button-block {
+    filter: brightness(50%) !important;
+}

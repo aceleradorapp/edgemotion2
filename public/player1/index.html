@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="URLBASE">
+    <!-- <base href="https://app.edgemotion.com.br/public/player1/"> -->
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link href="/player1/main.css" rel="stylesheet">
+
+    <title>EdgeMotion</title>
+    
+</head>
+
+<body>
+
+    <div class="anti-interation" id="antiInteration">
+
+    </div>
+
+    <div id="overlay" class="">
+        <div id="overlayMessage" class="message">CARREGANDO</div>
+        <div class="loader-under">
+            <div class="loader"></div>
+        </div>
+    </div>
+
+    <div class="dialog-container" id="dialogContainer">
+        <span class="material-icons">message</span>
+        <div class="title" id="titleMessage">Atenção!</div>
+        <div class="message" id="message">A tecla correta é "F"</div>
+    </div>
+
+    <div class="side-bar" id="sideBar">
+        <div class="title" id="titleSideBar">
+            EdgeMotion 1.0
+        </div>
+        <div class="profile">
+            <img src="/player1/images/capa.png" alt="">
+            <span id="name">Visitante</span>
+        </div>
+        <div class="content-items">
+            <ul>
+                <li data-name="menu-description">
+                    <div>
+                        <span class="material-icons">description</span>
+                        Fazer anotações
+                    </div>
+                </li>
+                <li data-name="menu-restore">
+                    <div>
+                        <span class="material-icons">restore</span>
+                        Voltar para o início
+                    </div>
+                </li>
+                <li data-name="menu-continue">
+                    <div class="item">
+                        <span class="material-icons">install_desktop</span>
+                        Continuar de onde parei
+                    </div>
+                </li>
+                <li data-name="menu-site">
+                    <div>
+                        <span class="material-icons">home</span>
+                        Visite nosso site
+                    </div>
+                </li>
+
+                <span class="separator"></span>
+
+                <li data-name="menu-exit">
+                    <div>
+                        <span class="material-icons">exit_to_app</span>
+                        Sair
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="header">
+        <div><span class="material-icons">sensors</span></div>
+        <div id="timeline" class="timeline">
+            <div class="line"></div>
+            <div class="line-complete"></div>
+        </div>
+        <div><span class="material-icons" id="typeInteration">verified</span></div>
+    </div>
+
+    <div class="container">
+        <div class="content-player">
+            <canvas id="canvas"></canvas>
+        </div>
+    </div>
+
+    <div id="footer" class="footer footer-hide">
+        <div class="controler">
+            <button class="button-round small button-cyan-light button-block" id="btnBack">
+                <i class="material-icons">first_page</i>
+            </button>
+
+            <div class="display-play">
+                <span>Cenas</span>
+                <div id="displayCaption" class="scenes-number">0/0</div>
+            </div>
+
+            <button class="button-round small button-cyan-light button-block" id="btnNext">
+                <i class="material-icons">last_page</i>
+            </button>
+        </div>
+
+        <div class="controler-caption">
+            <textarea id="caption" rows="3" onselectstart="return false;" readonly></textarea>
+        </div>
+
+        <div class="controler">
+            <div class="button-round small button-cyan-light" id="btnMenu">
+                <i class="material-icons">menu</i>
+            </div>
+        </div>
+    </div>
+
+    <!-- não remover essa tag abaixo -->
+    <!--KEY_PLACEHOLDER-->
+
+
+    <script>
+        var temporaryUrl = "{{ $temporaryUrl }}";
+        var homeRoute = "{{ $previousUrl }}";
+        // var trainingGuid = "{{ $guid }}"
+        //var homeRoute = "{{ route('home') }}";
+
+
+    </script>
+
+    <script src="/player1/main.js" type="module"></script>
+</body>
+
+</html>

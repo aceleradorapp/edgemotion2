@@ -7,5 +7,7 @@ router.use(authenticateToken);
 
 router.post('/', groupController.create);
 router.get('/project/:projectId', groupController.listByProject);
+router.put('/:id', groupController.update);
+router.delete('/delete/:id', groupController.delete);
 
 module.exports = router;

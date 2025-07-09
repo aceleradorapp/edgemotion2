@@ -16,7 +16,16 @@ module.exports = (sequelize, DataTypes) => {
       references: { model: 'users', key: 'id' }
     },
     name: { type: DataTypes.STRING, allowNull: false },
-    description: { type: DataTypes.TEXT },    
+    description: { type: DataTypes.TEXT },
+    imageUrl: {
+      type: DataTypes.STRING,
+      defaultValue: '/uploads/project/default.png' // <-- Linha alterada
+    },
+    isContracted: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    }
   }, {
     tableName: 'projects',
     timestamps: true,
@@ -26,6 +35,7 @@ module.exports = (sequelize, DataTypes) => {
     Project.belongsTo(models.User, { foreignKey: 'userId' });
     Project.hasMany(models.ToolInstance, { foreignKey: 'projectId' });
     Project.hasMany(models.ProjectParticipant, { foreignKey: 'projectId' });
+    Project.hasMany(models.SharedLink, { foreignKey: 'projectId' });
   };
 
   return Project;

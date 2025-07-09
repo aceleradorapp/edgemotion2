@@ -1,0 +1,209 @@
+@import url('./stylePlayer/style.css');
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    color: var(--color-text-secondary);
+    background-color: #000;
+    font-family: Roboto;
+    user-select: none;
+}
+
+.anti-interation {
+    position: fixed;
+    width: 100%;
+    height: calc(100vh - 76px);
+}
+
+.anti-interation-free {
+    pointer-events: none !important;
+}
+
+#canvas {
+    background-color: var(--content-background);
+}
+
+.header {
+    /* position: fixed; */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 23px;
+    border-bottom: 1px solid;
+    border-bottom-color: var(--color-primary-dark);
+    background-color: var(--color-background-secondary);
+    z-index: 100;
+}
+
+.header>div {
+    padding: 0 10px;
+}
+
+/* Estilo para o container */
+.container {
+    height: calc(100vh - 98px);
+    display: flex;
+    flex-direction: row;
+}
+
+/* Estilo para o conteúdo */
+.content-player {
+    flex-grow: 1;
+    background-color: var(--content-background);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--content-border-color);
+    border-radius: 4px;
+    /* margin: 12px; */
+    overflow: auto;
+}
+
+.footer {
+    position: fixed;
+    display: flex;
+    justify-content: space-around;
+    gap: 2px;
+    bottom: 0;
+    width: 100%;
+    height: 73px;
+    border-top: 1px solid;
+    border-top-color: var(--color-primary-dark);
+    background-color: var(--color-background-secondary);
+    z-index: 200;
+    transition: bottom 0.5s ease;
+}
+
+.footer-hide {
+    bottom: -100px !important;
+}
+
+.controler {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 0 20px 0 20px;
+    margin: 5px 0;
+    background-color: var(--color-background-primary);
+}
+
+.controler>.display-play {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    min-width: 52px;
+    padding: 5px 10px;
+    border: 1px solid;
+    border-color: var(--color-primary-dark);
+    border-radius: 5px;
+    color: var(--color-primary-dark);
+
+}
+
+.controler>.display-play>span {
+    position: absolute;
+    top: -8px;
+    padding: 0 2px;
+    font-size: 11px;
+    color: var(--color-primary-dark);
+    background-color: var(--color-background-primary);
+}
+
+.controler>.display-play>.scenes-number {
+    color: var(--color-text-secondary);
+}
+
+.controler-caption {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    justify-content: center;
+    width: 80%;
+    padding: 0 20px 0 20px;
+    margin: 5px 0;
+    background-color: var(--color-background-primary);
+}
+
+.controler-caption>#caption {
+    width: 100%;
+    resize: none;
+    overflow: hidden;
+    font-family: Roboto;
+    font-size: 16px;
+    text-align: center;
+    border: none;
+    color: var(--color-text-secondary);
+    background-color: var(--color-background-primary);
+}
+
+.controler-caption>#caption {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    outline: none;
+}
+
+.timeline {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 70%;
+}
+
+.timeline>.line {
+    position: absolute;
+    width: calc(100% - 24px);
+    height: 2px;
+    background-color: var(--color-cyan);
+    left: 10px;
+    top: 6px;
+}
+
+.timeline>.line-complete {
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background-color: var(--color-primary-light);
+    left: 10px;
+    top: 6px;
+}
+
+.timeline>.scene {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid;
+    border-color: var(--color-cyan);
+    border-right-color: transparent;
+    z-index: 50;
+    cursor: pointer;
+}
+
+.timeline>.scene-executed {
+    border-color: var(--color-primary-light);
+    border-right-color: transparent;
+}
+
+.timeline>.scene.scene-executed>.dot {
+    background-color: var(--color-primary-light);
+    border-color: var(--color-primary-light);
+}
+
+.timeline>.scene>.dot {
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    border: 2px solid;
+    border-color: var(--color-cyan);
+    background-color: var(--color-cyan);
+}

@@ -1,4 +1,6 @@
 // src/controllers/toolInstanceController.js
+const fs = require('fs');
+const path = require('path');
 const { ToolInstance, Project } = require('../models');
 
 module.exports = {
@@ -40,10 +42,34 @@ module.exports = {
   }
 },
 
+async show(req, res) {
+  try {
+    const { id } = req.params;
+
+    const tool = await ToolInstance.findByPk(id);
+    if (!tool) {
+      return res.status(404).json({ error: 'Ferramenta não encontrada.' });
+    }
+
+    const project = await Project.findOne({
+      where: { id: tool.projectId, userId: req.user.id }
+    });
+
+    if (!project) {
+      return res.status(403).json({ error: 'Sem permissão para visualizar esta ferramenta.' });
+    }
+
+    res.json(tool);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao buscar ferramenta.' });
+  }
+},
+
 
   async create(req, res) {
     try {
-      const { projectId, toolType, title, description, dataUrl, order } = req.body;
+      const { projectId, toolType, title, description, dataUrl, orderNumber } = req.body;
 
       const project = await Project.findOne({
         where: { id: projectId, userId: req.user.id }
@@ -59,7 +85,7 @@ module.exports = {
         title,
         description,
         dataUrl,
-        order
+        orderNumber
       });
 
       res.status(201).json(tool);
@@ -86,9 +112,9 @@ module.exports = {
         return res.status(403).json({ error: 'Sem permissão para alterar esta ferramenta.' });
       }
 
-      const { toolType, title, description, dataUrl, order } = req.body;
+      const { toolType, title, description, dataUrl, orderNumber } = req.body;
 
-      await tool.update({ toolType, title, description, dataUrl, order });
+      await tool.update({ toolType, title, description, dataUrl, orderNumber });
 
       res.json(tool);
     } catch (error) {
@@ -120,5 +146,64 @@ module.exports = {
       console.error(error);
       res.status(500).json({ error: 'Erro ao remover ferramenta.' });
     }
+  },
+
+  // 🔹 Lê JSON da ferramenta
+  async readJson(req, res) {
+    try {
+      const { id } = req.params;
+
+      const tool = await ToolInstance.findByPk(id);
+      if (!tool) return res.status(404).json({ error: 'Ferramenta não encontrada.' });
+
+      const project = await Project.findOne({
+        where: { id: tool.projectId, userId: req.user.id }
+      });
+      if (!project) return res.status(403).json({ error: 'Sem permissão.' });
+
+      const userId = req.user.id;
+      const filePath = path.join(__dirname, '../../uploads/tool', String(userId), `${tool.guid}.json`);
+
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ error: 'Arquivo JSON não encontrado.' });
+      }
+
+      const content = await fs.promises.readFile(filePath, 'utf-8');
+      const data = JSON.parse(content);
+
+      res.json({ data });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Erro ao ler JSON.' });
+    }
+  },
+
+  async deleteJson(req, res) {
+    try {
+      const { id } = req.params;
+
+      const tool = await ToolInstance.findByPk(id);
+      if (!tool) return res.status(404).json({ error: 'Ferramenta não encontrada.' });
+
+      const project = await Project.findOne({
+        where: { id: tool.projectId, userId: req.user.id }
+      });
+      if (!project) return res.status(403).json({ error: 'Sem permissão.' });
+
+      const userId = req.user.id;
+      const filePath = path.join(__dirname, '../../uploads/tool', String(userId), `${tool.guid}.json`);
+
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ error: 'Arquivo JSON não encontrado.' });
+      }
+
+      await fs.promises.unlink(filePath);
+      res.json({ message: 'Arquivo JSON deletado com sucesso.' });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Erro ao deletar JSON.' });
+    }
   }
+
 };
+

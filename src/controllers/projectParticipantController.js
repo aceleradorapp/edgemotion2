@@ -1,5 +1,5 @@
 // src/controllers/projectParticipantController.js
-const { ProjectParticipant, Project } = require('../models');
+const { ProjectParticipant, Project, SharedLink } = require('../models');
 
 module.exports = {
   // Criar participante
@@ -86,5 +86,68 @@ module.exports = {
       console.error(error);
       res.status(500).json({ error: 'Erro ao buscar por token.' });
     }
+  },
+
+  async listByUser(req, res) {
+  try {
+    const { userId } = req.params;
+    const userType = req.user?.userTypeId;
+
+    const sharedLinkAttributes = userType === 3
+      ? ['guid', 'keyword']
+      : ['guid'];
+
+    const participants = await ProjectParticipant.findAll({
+      where: { userId },
+      include: [
+        {
+          model: Project,
+          include: [
+            {
+              model: SharedLink,
+              attributes: sharedLinkAttributes,
+              where: { isActive: true },
+              required: false
+            }
+          ]
+        }
+      ]
+    });
+
+    res.json(participants);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao listar projetos do usuário.' });
   }
+},
+
+
+  async remove(req, res) {
+    try {
+      const { id } = req.params;
+
+      const participant = await ProjectParticipant.findByPk(id);
+      if (!participant) {
+        return res.status(404).json({ error: 'Participante não encontrado.' });
+      }
+
+      // Verifica se o usuário autenticado é o dono do projeto
+      const project = await Project.findOne({
+        where: { id: participant.projectId, userId: req.user.id }
+      });
+
+      if (!project) {
+        return res.status(403).json({ error: 'Sem permissão para remover esse vínculo.' });
+      }
+
+      await participant.destroy();
+      res.json({ message: 'Vínculo removido com sucesso.' });
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Erro ao remover vínculo.' });
+    }
+  }
+
+
 };

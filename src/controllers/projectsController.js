@@ -5,7 +5,10 @@ module.exports = {
   async index(req, res) {
     try {
       const projects = await Project.findAll({
-        where: { userId: req.user.id }
+        where: {
+          userId: req.user.id,
+          isContracted: false
+        }
       });
       res.json(projects);
     } catch (error) {
@@ -19,7 +22,8 @@ module.exports = {
       const project = await Project.findOne({
         where: {
           id: req.params.id,
-          userId: req.user.id
+          userId: req.user.id,
+          isContracted: false
         }
       });
 
@@ -34,13 +38,28 @@ module.exports = {
     }
   },
 
+  async showAll(req, res) {
+    try {
+      const projects = await Project.findAll({
+        where: {
+          userId: req.user.id,
+        }
+      });
+      res.json(projects);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Erro ao listar projetos.' });
+    }
+  },
+
   async create(req, res) {
     try {
       const { name, description } = req.body;
       const newProject = await Project.create({
         name,
         description,
-        userId: req.user.id
+        userId: req.user.id,
+        isContracted: false
       });
 
       res.status(201).json(newProject);
@@ -56,7 +75,8 @@ module.exports = {
       const project = await Project.findOne({
         where: {
           id: req.params.id,
-          userId: req.user.id
+          userId: req.user.id,
+          isContracted: false
         }
       });
 
@@ -77,7 +97,8 @@ module.exports = {
       const project = await Project.findOne({
         where: {
           id: req.params.id,
-          userId: req.user.id
+          userId: req.user.id,
+          isContracted: false
         }
       });
 

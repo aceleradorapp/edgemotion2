@@ -1,0 +1,185 @@
+/* 
+    .color-primary: Aplica a cor primária.
+    .background-primary: Define a cor de fundo primária.
+    .color-primary-dark: Aplica a cor primária escura.
+    .background-primary-dark: Define a cor de fundo primária escura.
+    .color-primary-light: Aplica a cor primária clara.
+    .background-primary-light: Define a cor de fundo primária clara.
+    .color-cyan: Aplica a cor cyan.
+    .background-cyan: Define a cor de fundo cyan.
+    .color-text-primary: Aplica a cor de texto primária.
+    .color-text-secondary: Aplica a cor de texto secundária.
+    .background-text-primary: Define a cor de fundo do texto primário.
+    .background-text-secondary: Define a cor de fundo do texto secundário.
+    .color-background-primary: Aplica a cor de fundo primária.
+    .background-background-primary: Define a cor de fundo de fundo primária.
+    .color-background-secondary: Aplica a cor de fundo secundária.
+    .background-background-secondary: Define a cor de fundo de fundo secundária.
+    .color-accent: Aplica a cor de destaque.
+    .background-accent: Define a cor de fundo de destaque.
+    .color-accent-dark: Aplica a cor de destaque escura.
+    .background-accent-dark: Define a cor de fundo de destaque escura.
+    .color-red-dark: Aplica a cor vermelho escuro.
+    .background-red-dark: Define a cor de fundo vermelho escuro.
+    .color-blue: Aplica a cor azul.
+    .background-blue: Define a cor de fundo azul.
+    .color-blue-dark: Aplica a cor azul escuro.
+    .background-blue-dark: Define a cor de fundo azul escuro.  
+*/
+
+:root {
+    --canvas-border-color: #dddddd;
+    --background-color: #ffffff;
+
+    /* Cores primárias */
+    --color-primary: #74b903;
+    --color-primary-dark: #609b01;
+    --color-primary-light: #91e900; 
+    --color-cyan: #7d8389;
+    --color-cyan-dark: #1f1f1f;
+
+    /* Cores de texto */
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #dcdcdc;
+
+    /* Cores de fundo */
+    --color-background-primary: #1f1f1f;
+    --color-background-secondary: #333333;
+
+    /* Cores de destaque */
+    --color-accent: #fbd639;
+    --color-accent-dark: #ad29db;
+
+    /* Cores adicionais */
+    --color-red-dark: #e84825;
+    --color-blue: #0e4de8;
+    --color-blue-dark: #11399c;
+}
+
+.color-primary {
+    color: var(--color-primary);
+}
+
+.background-primary {
+    background-color: var(--color-primary);
+}
+
+.color-primary-dark {
+    color: var(--color-primary-dark);
+}
+
+.background-primary-dark {
+    background-color: var(--color-primary-dark);
+}
+
+.color-primary-light {
+    color: var(--color-primary-light);
+}
+
+.background-primary-light {
+    background-color: var(--color-primary-light);
+}
+
+.color-cyan {
+    color: var(--color-cyan);
+}
+
+.background-cyan {
+    background-color: var(--color-cyan);
+}
+
+.color-text-primary {
+    color: var(--color-text-primary);
+}
+
+.color-accent {
+    color: var(--color-accent);
+}
+
+.background-accent {
+    background-color: var(--color-accent);
+}
+
+.color-accent-dark {
+    color: var(--color-accent-dark);
+}
+
+.background-accent-dark {
+    background-color: var(--color-accent-dark);
+}
+
+.color-red-dark {
+    color: var(--color-red-dark);
+}
+
+.background-red-dark {
+    background-color: var(--color-red-dark);
+}
+
+.color-blue {
+    color: var(--color-blue);
+}
+
+.background-blue {
+    background-color: var(--color-blue);
+}
+
+.color-blue-dark {
+    color: var(--color-blue-dark);
+}
+
+.background-blue-dark {
+    background-color: var(--color-blue-dark);
+}
+
+/* Cores dos botões */
+
+.button-primary {
+    color: var(--color-text-primary);
+    background-color: var(--color-primary);
+}
+
+.button-secondary {
+    color: var(--color-text-primary);
+    background-color: var(--color-primary-dark);
+}
+
+.button-cyan-dark {
+    color: #1f1f1f;
+    background-color: var(--color-cyan);
+}
+
+.button-cyan-light {
+    color: #c5c5c5;
+    background-color: var(--color-cyan);
+}
+
+.button-light {
+    color: var(--color-text-primary);
+    background-color: var(--color-primary-light);
+}
+
+.button-accent {
+    color: var(--color-text-primary);
+    background-color: var(--color-accent);
+}
+
+.button-accent-dark {
+    color: var(--color-text-primary);
+    background-color: var(--color-accent-dark);
+}
+
+.button-red-dark {
+    color: var(--color-text-primary);
+    background-color: var(--color-red-dark);
+}
+
+.button-blue {
+    color: var(--color-text-primary);
+    background-color: var(--color-blue);
+}
+
+.button-blue-dark {
+    color: var(--color-text-primary);
+    background-color: var(--color-blue-dark);
+}

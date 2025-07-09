@@ -1,0 +1,181 @@
+/* Botão Flat */
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 1px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: filter 0.5s ease;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Efeito de aumentar o brilho no hover */
+.button:hover {
+    filter: brightness(120%);
+}
+
+.button-block {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.button-block-through {
+    opacity: 0.5;
+    text-decoration: line-through;
+    pointer-events: none;
+}
+
+/* Tamanho Block */
+.button.block {
+    display: block;
+    width: 100%;
+}
+
+/* Tamanho Grande */
+.button.large {
+    font-size: 20px;
+}
+
+/* Tamanho Pequeno */
+.button.small {
+    padding: 7px 12px;
+    font-size: 13px;
+}
+
+.button.x-small {
+    font-size: 11px;
+    padding: 5px 12px;
+}
+
+.button-flat {
+    border-radius: 0 !important;
+}
+
+/* Exemplo de uso dos botões */
+
+/* Botão Redondo */
+.button-round {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    margin: 1px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    font-size: 16px;
+    transition: filter 0.5s ease;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Efeito de aumentar o brilho no hover */
+.button-round:hover {
+    filter: brightness(120%);
+}
+
+/* Tamanho Grande */
+.button-round.large {
+    font-size: 24px;
+    padding: 16px;
+}
+
+/* Tamanho Normal */
+.button-round.normal {
+    font-size: 20px;
+    padding: 12px;
+}
+
+/* Tamanho Pequeno */
+.button-round.small {
+    font-size: 16px;
+    padding: 8px;
+}
+
+/* Tamanho Extra Pequeno */
+.button-round.x-small {
+    font-size: 12px;
+    padding: 4px;
+}
+
+/* Exemplo de uso dos botões redondos com Material Icons */
+
+/* Botão Outline */
+.button-outline {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 1px;
+    border: 2px solid var(--color-text-primary);
+    border-radius: 8px;
+    font-size: 16px;
+    transition: filter 0.5s ease;
+    cursor: pointer;
+    user-select: none;
+    color: var(--color-text-primary);
+    background-color: transparent !important;
+}
+
+/* Efeito de aumentar o brilho no hover */
+.button-outline:hover {
+    filter: brightness(120%);
+}
+
+/* Tamanho Grande */
+.button-outline.large {
+    font-size: 20px;
+}
+
+/* Tamanho Pequeno */
+.button-outline.small {
+    padding: 7px 12px;
+    font-size: 13px;
+}
+
+/* Tamanho Block */
+.button-outline.block {
+    display: block;
+    width: 100%;
+}
+
+.button-outline.x-small {
+    font-size: 11px;
+    padding: 5px 12px;
+}
+
+.button-outline.button-primary {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.button-outline.button-secondary {
+    color: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+}
+
+.button-outline.button-cyan-dark {
+    color: var(--color-cyan);
+    border-color: var(--color-cyan);
+}
+
+.button-outline.button-cyan-light {
+    color: #c5c5c5;
+    border-color: var(--color-cyan);
+}
+
+.button-outline.button-light {
+    color: var(--color-primary-light);
+    border-color: var(--color-primary-light);
+}
+
+.button-outline.button-accent {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.button-outline.button-accent-dark {
+    color: var(--color-accent-dark);
+    border-color: var(--color-accent-dark);
+}

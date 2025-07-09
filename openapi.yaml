@@ -40,6 +40,10 @@ tags:
     description: Criação e acesso a links públicos para projetos.
   - name: Uploads
     description: Uploads de arquivos.
+  - name: Components
+    description: Componentes.
+  - name: Component Categories
+    description: Component-categories de arquivos.
 
 components:
   securitySchemes:
@@ -1364,3 +1368,354 @@ paths:
           description: Imagem não encontrada.
         '500':
           description: Erro interno ao tentar deletar a imagem.
+
+
+  /components:
+    post:
+      tags:
+        - Components
+      summary: Cria um novo componente
+      description: Adiciona um novo componente ao sistema com base nos dados fornecidos.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - identifier
+                - title
+                - icon
+                - category
+                - index
+                - route
+                - categoryId
+              properties:
+                identifier:
+                  type: string
+                  example: "correct_alternatives"
+                title:
+                  type: string
+                  example: "Alternativas"
+                icon:
+                  type: string
+                  example: "ListChecks"
+                category:
+                  type: string
+                  example: "Testes"
+                index:
+                  type: integer
+                  example: 0
+                route:
+                  type: string
+                  example: "/testes/alternativas"
+                userTypeId:
+                  type: string
+                  example: "all"
+                categoryId:
+                  type: integer
+                  example: 1
+      responses:
+        '201':
+          description: Componente criado com sucesso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  guid:
+                    type: string
+                    example: "cf1bced1-fb39-4f94-9fdd-dfe209273478"
+                  identifier:
+                    type: string
+                    example: "correct_alternatives"
+                  title:
+                    type: string
+                    example: "Alternativas"
+                  icon:
+                    type: string
+                    example: "ListChecks"
+                  category:
+                    type: string
+                    example: "Testes"
+                  index:
+                    type: integer
+                    example: 0
+                  route:
+                    type: string
+                    example: "/testes/alternativas"
+                  userTypeId:
+                    type: string
+                    example: "all"
+                  categoryId:
+                    type: integer
+                    example: 1
+        '400':
+          description: Requisição inválida.
+        '401':
+          description: Não autorizado.
+        '500':
+          description: Erro interno ao criar componente.
+
+    get:
+      tags:
+        - Components
+      summary: Lista todos os componentes
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de componentes retornada com sucesso.
+        '401':
+          description: Não autorizado.
+        '500':
+          description: Erro interno.
+
+  /components/map:
+    get:
+      tags:
+        - Components
+      summary: Retorna o mapa das categorias.      
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Componente mapa retornada com sucesso.
+        '404':
+          description: Componente mapa não encontrada.
+        '401':
+          description: Não autorizado.
+        '500':
+          description: Erro interno.
+
+  /components/{id}:
+    get:
+      tags:
+        - Components
+      summary: Retorna um componente pelo ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Componente retornado com sucesso.
+        '404':
+          description: Componente não encontrado.
+        '401':
+          description: Não autorizado.
+        '500':
+          description: Erro interno.
+
+    put:
+      tags:
+        - Components
+      summary: Atualiza um componente
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                identifier:
+                  type: string
+                title:
+                  type: string
+                icon:
+                  type: string
+                category:
+                  type: string
+                index:
+                  type: integer
+                route:
+                  type: string
+                userTypeId:
+                  type: string
+                categoryId:
+                  type: integer
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Componente atualizado.
+        '404':
+          description: Componente não encontrado.
+        '401':
+          description: Não autorizado.
+        '500':
+          description: Erro interno.
+
+    delete:
+      tags:
+        - Components
+      summary: Remove um componente
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Componente deletado com sucesso.
+        '404':
+          description: Componente não encontrado.
+        '401':
+          description: Não autorizado.
+        '500':
+          description: Erro interno.
+  
+  /component-categories:
+    post:
+      tags:
+        - Component Categories
+      summary: Cria uma nova categoria de componente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                index:
+                  type: integer
+                  example: 0  
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Categoria criada com sucesso.
+        '401':
+          description: Não autorizado.
+        '500':
+          description: Erro interno.
+
+    get:
+      tags:
+        - Component Categories
+      summary: Lista todas as categorias e componentes
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Categorias retornadas com sucesso.
+        '401':
+          description: Não autorizado.
+        '500':
+          description: Erro interno.   
+
+  /component-categories/listCategory:
+    get:
+      tags:
+        - Component Categories
+      summary: Retorna uma categoria de componente por ID      
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Categoria retornada com sucesso.
+        '404':
+          description: Categoria não encontrada.
+        '401':
+          description: Não autorizado.
+        '500':
+          description: Erro interno. 
+
+  /component-categories/{id}:
+    get:
+      tags:
+        - Component Categories
+      summary: Retorna uma categoria e componente por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Categoria retornada com sucesso.
+        '404':
+          description: Categoria não encontrada.
+        '401':
+          description: Não autorizado.
+        '500':
+          description: Erro interno.    
+
+    put:
+      tags:
+        - Component Categories
+      summary: Atualiza uma categoria de componente
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Categoria atualizada.
+        '404':
+          description: Categoria não encontrada.
+        '401':
+          description: Não autorizado.
+        '500':
+          description: Erro interno.
+
+    delete:
+      tags:
+        - Component Categories
+      summary: Remove uma categoria de componente
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Categoria removida com sucesso.
+        '404':
+          description: Categoria não encontrada.
+        '401':
+          description: Não autorizado.
+        '500':
+          description: Erro interno.
+
+
+
