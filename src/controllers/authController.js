@@ -57,6 +57,12 @@ module.exports = {
                 return res.status(401).json({ error: 'Senha incorreta' });
             }
 
+            const role =
+                user.userTypeId === 3 ? 'owner' :
+                    user.userTypeId === 2 ? 'user' :
+                        'visitor';
+
+
             const token = jwt.sign(
                 {
                     id: user.id,
@@ -64,6 +70,7 @@ module.exports = {
                     email: user.email,
                     userTypeId: user.userTypeId,
                     profileId: user.profileId,
+                    role: role
                 },
                 SECRET,
                 { expiresIn: '1d' }
@@ -110,4 +117,3 @@ module.exports = {
     }
 
 };
- 

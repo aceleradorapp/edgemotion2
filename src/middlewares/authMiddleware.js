@@ -19,7 +19,15 @@ async function authenticateToken(req, res, next) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
 
-    req.user = user; // usuário completo no request
+    req.user = {
+      ...decoded,
+      displayName: user.displayName,
+      photoUrl: user.photoUrl,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    };
+
+    //req.user = user; // usuário completo no request
     next();
   } catch (err) {
     console.error(err);

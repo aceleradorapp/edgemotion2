@@ -42,7 +42,7 @@ module.exports = {
 
             let userIdToUse = loggedUserId;
 
-            if (userIdBody && loggedUserRole === 'admin') {
+            if (userIdBody && loggedUserRole === "owner") {
                 userIdToUse = userIdBody;
             }
 

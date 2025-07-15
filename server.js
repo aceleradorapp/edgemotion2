@@ -24,6 +24,7 @@ const playerRoutes = require('./src/routes/playerRoutes');
 const contractedProjectsRoutes = require('./src/routes/contractedProjectsRoutes');
 const usersRoutes = require('./src/routes/usersRoutes');
 const messageRoutes = require('./src/routes/messageRoutes');
+const menuItemRoutes = require('./src/routes/menuItemRoutes');
 
 
 const swaggerDocument = YAML.load(path.join(__dirname, 'openapi.yaml'));
@@ -55,6 +56,7 @@ app.use('/api/components', componentRoutes);
 app.use('/api', playerRoutes);
 app.use('/api', usersRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/menu-items', menuItemRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // acessar imagem via URL pública

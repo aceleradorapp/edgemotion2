@@ -25,7 +25,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
-    }
+    },
+    codeLink: {
+      type: DataTypes.STRING,
+      allowNull: true // Pode começar nulo
+    },
   }, {
     tableName: 'projects',
     timestamps: true,

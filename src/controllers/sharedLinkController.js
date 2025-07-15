@@ -6,9 +6,21 @@ module.exports = {
   // Criar link de compartilhamento
   async create(req, res) {
     try {
-      const { projectId, expiresAt, keyword } = req.body;
+      const { projectId, expiresAt, keyword, userId: userIdBody } = req.body;
 
-      const project = await Project.findOne({ where: { id: projectId, userId: req.user.id } });
+      const loggedUserId = req.user.id;
+      const loggedUserRole = req.user.role;
+
+      // Dono do token por padrão
+      let userIdToUse = loggedUserId;
+
+      // Se for um owner e estiver passando userId, usar o informado
+      if (userIdBody && loggedUserRole === 'owner') {
+        userIdToUse = userIdBody;
+      }
+
+      // Verifica se o projeto pertence ao userIdToUse (seja owner ou não)
+      const project = await Project.findOne({ where: { id: projectId, userId: userIdToUse } });
       if (!project) {
         return res.status(403).json({ error: 'Projeto não encontrado ou sem permissão.' });
       }
@@ -17,12 +29,14 @@ module.exports = {
 
       const sharedLink = await SharedLink.create({
         projectId,
-        userId: req.user.id,
+        userId: userIdToUse,
         linkCode,
         keyword,
         expiresAt: expiresAt || null,
         isActive: true
       });
+
+      await project.update({ codeLink: linkCode });
 
       res.status(201).json({
         message: 'Link de compartilhamento criado com sucesso.',
@@ -34,8 +48,8 @@ module.exports = {
     }
   },
 
-   async getAll(req, res) {
-    try {      
+  async getAll(req, res) {
+    try {
 
       const link = await SharedLink.findAll({ where: { isActive: true } });
 
@@ -103,6 +117,42 @@ module.exports = {
       console.error(error);
       res.status(500).json({ error: 'Erro ao buscar keyword pelo GUID.' });
     }
-  }
+  },
+
+  async updateExpiresAt(req, res) {
+    try {
+      const { guid } = req.params;
+      const { expiresAt } = req.body;
+
+      if (!expiresAt) {
+        return res.status(400).json({ error: 'O campo expiresAt é obrigatório.' });
+      }
+
+      const link = await SharedLink.findOne({ where: { guid } });
+
+      if (!link) {
+        return res.status(404).json({ error: 'Link de compartilhamento não encontrado.' });
+      }
+
+      const loggedUserId = req.user.id;
+      const loggedUserRole = req.user.role;
+
+      if (link.userId !== loggedUserId && loggedUserRole !== 'owner') {
+        return res.status(403).json({ error: 'Sem permissão para atualizar este link.' });
+      }
+
+      await link.update({ expiresAt });
+
+      return res.json({
+        message: 'Data de expiração atualizada com sucesso.',
+        link
+      });
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Erro ao atualizar data de expiração do link.' });
+    }
+  },
+
 
 };

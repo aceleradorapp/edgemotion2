@@ -18,4 +18,6 @@ router.put('/:id/read', messageController.markAsRead);
 // Marcar mensagem como deletada (soft delete para o destinatário)
 router.put('/:messageId/delete', messageController.markAsDeleted);
 
+router.delete('/:id', messageController.delete);
+
 module.exports = router;

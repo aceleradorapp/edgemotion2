@@ -8,5 +8,6 @@ router.post('/', authenticateToken, controller.create);
 router.get('/', controller.getAll);
 router.get('/:code', controller.getByCode); // acesso público
 router.get('/guid/:guid', controller.getKeywordByGuid);
+router.put('/:guid/expires-at', authenticateToken, controller.updateExpiresAt);
 
 module.exports = router;
