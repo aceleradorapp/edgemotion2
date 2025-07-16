@@ -5,13 +5,13 @@ const contractedProjectsController = require('../controllers/contractedProjectsC
 const authenticateToken = require('../middlewares/authMiddleware');
 const authorizeOwner = require('../middlewares/authorizeOwner');
 
-router.use(authenticateToken, authorizeOwner);
+router.use(authenticateToken);
 
 router.get('/', contractedProjectsController.index);
 router.get('/:id', contractedProjectsController.show);
 router.get('/user/:userId', contractedProjectsController.listByUser);
-router.post('/', contractedProjectsController.create); 
-router.put('/:id', contractedProjectsController.update);
-router.delete('/:id', contractedProjectsController.delete);
+router.post('/', authorizeOwner, contractedProjectsController.create); 
+router.put('/:id', authorizeOwner, contractedProjectsController.update);
+router.delete('/:id', authorizeOwner, contractedProjectsController.delete);
 
 module.exports = router;

@@ -4,12 +4,12 @@ const menuItemController = require('../controllers/menuItemController');
 const authenticateToken = require('../middlewares/authMiddleware');
 const authorizeOwner = require('../middlewares/authorizeOwner');
 
-router.use(authenticateToken, authorizeOwner);
+router.use(authenticateToken);
 
-router.post('/', menuItemController.create);
-router.get('/', menuItemController.listAll);
-router.put('/:id', menuItemController.update);
-router.delete('/delete/:id', menuItemController.delete);
+router.post('/', authorizeOwner, menuItemController.create);
+router.get('/', authorizeOwner, menuItemController.listAll);
+router.put('/:id', authorizeOwner, menuItemController.update);
+router.delete('/delete/:id', authorizeOwner, menuItemController.delete);
 router.get('/filters', menuItemController.listAllFilter);
 
 module.exports = router;
