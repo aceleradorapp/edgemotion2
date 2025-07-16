@@ -3,8 +3,9 @@ const express = require('express');
 const router = express.Router();
 const contractedProjectsController = require('../controllers/contractedProjectsController');
 const authenticateToken = require('../middlewares/authMiddleware');
+const authorizeOwner = require('../middlewares/authorizeOwner');
 
-router.use(authenticateToken);
+router.use(authenticateToken, authorizeOwner);
 
 router.get('/', contractedProjectsController.index);
 router.get('/:id', contractedProjectsController.show);

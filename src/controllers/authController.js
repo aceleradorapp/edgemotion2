@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { User } = require('../models');
+const { User, UserType, Profile } = require('../models');
 
 const SECRET = process.env.JWT_SECRET || 'segredo-super-seguro';
 
@@ -45,7 +45,13 @@ module.exports = {
         try {
             const { email, password } = req.body;
 
-            const user = await User.findOne({ where: { email } });
+            const user = await User.findOne({
+                where: { email },
+                include: [
+                    { model: UserType, attributes: ['id', 'code', 'name'] },
+                    { model: Profile, attributes: ['id', 'code', 'name'] }
+                ]
+            });
 
             if (!user) {
                 return res.status(404).json({ error: 'Usuário não encontrado' });
@@ -57,10 +63,10 @@ module.exports = {
                 return res.status(401).json({ error: 'Senha incorreta' });
             }
 
-            const role =
-                user.userTypeId === 3 ? 'owner' :
-                    user.userTypeId === 2 ? 'user' :
-                        'visitor';
+            // const role =
+            //     user.userTypeId === 3 ? 'owner' :
+            //         user.userTypeId === 2 ? 'user' :
+            //             'visitor';
 
 
             const token = jwt.sign(
@@ -69,8 +75,8 @@ module.exports = {
                     guid: user.guid,
                     email: user.email,
                     userTypeId: user.userTypeId,
-                    profileId: user.profileId,
-                    role: role
+                    profileId: user.profileId,                    
+                    role: user.UserType?.name || null
                 },
                 SECRET,
                 { expiresIn: '1d' }
@@ -86,7 +92,10 @@ module.exports = {
                     displayName: user.displayName,
                     photoUrl: user.photoUrl,
                     userTypeId: user.userTypeId,
-                    profileId: user.profileId,
+                    profileId: user.profileId,   
+                    userType: user.UserType?.code || null,   
+                    profile: user.Profile?.code || null,              
+                    role: user.UserType?.name || null
                 },
             });
         } catch (error) {
