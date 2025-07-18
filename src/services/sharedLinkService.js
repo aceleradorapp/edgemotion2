@@ -1,5 +1,5 @@
 // src/services/sharedLinkService.js
-const { SharedLink } = require('../models');
+const { SharedLink, Project } = require('../models');
 
 async function getKeywordByGuid(guid) {
   const link = await SharedLink.findOne({
@@ -15,6 +15,12 @@ async function getKeywordByGuid(guid) {
 
   if (link.expiresAt && new Date(link.expiresAt) < new Date()) {
     await SharedLink.destroy({ where: { id: link.id } });
+    
+    await Project.update(
+      { codeLink: null },
+      { where: { id: link.projectId } }
+    );
+    
     throw new Error('Link expirado.');
   }
 

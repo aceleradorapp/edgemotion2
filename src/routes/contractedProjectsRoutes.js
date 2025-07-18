@@ -7,6 +7,8 @@ const authorizeOwner = require('../middlewares/authorizeOwner');
 
 router.use(authenticateToken);
 
+router.post('/demo', contractedProjectsController.demoCreate); 
+
 router.get('/', contractedProjectsController.index);
 router.get('/:id', contractedProjectsController.show);
 router.get('/user/:userId', contractedProjectsController.listByUser);

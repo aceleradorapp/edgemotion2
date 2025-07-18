@@ -1,5 +1,7 @@
 // src/controllers/contractedProjectsController.js
 const { Project, SharedLink } = require('../models');
+const { Op, col, where } = require('sequelize');
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = {
     async index(req, res) {
@@ -68,8 +70,8 @@ module.exports = {
 
             // Defina os atributos dinamicamente
             const sharedLinkAttributes = userType === 3
-                ? ['guid', 'keyword']
-                : ['guid']; // oculta o keyword
+                ? ['guid', 'keyword', 'expiresAt']
+                : ['guid', 'expiresAt']; // oculta o keyword
 
             const projects = await Project.findAll({
                 where: {
@@ -80,7 +82,10 @@ module.exports = {
                     {
                         model: SharedLink,
                         attributes: sharedLinkAttributes,
-                        where: { isActive: true },
+                        where: { 
+                            isActive: true, 
+                            linkCode: where(col('SharedLinks.linkCode'), '=', col('Project.codeLink')) 
+                        },
                         required: false
                     }
                 ]
@@ -137,5 +142,79 @@ module.exports = {
             console.error(error);
             res.status(500).json({ error: 'Erro ao remover projeto contratado.' });
         }
+    },
+
+    async demoCreate(req, res) {
+        try {
+            const loggedUser = req.user;
+
+            if (!loggedUser) {
+                return res.status(401).json({ error: 'Usuário não autenticado.' });
+            }
+
+            const demos = [
+                {
+                    name: 'Demo EdgeMotion',
+                    description: 'Conhecendo o material desenvolvido pela equipe EdgeMotion',
+                    imageUrl: '/uploads/project/edgemotioncapa.jpg',
+                    keyword: 'midia01',
+                },
+                {
+                    name: 'Demo Intelbras',
+                    description: 'Conhecendo a interface do sistema intelbras',
+                    imageUrl: '/uploads/project/intelbrascapa.jpg',
+                    keyword: 'midia02',
+                },
+                {
+                    name: 'Demo Arduino',
+                    description: 'Construindo com Arduino',
+                    imageUrl: '/uploads/project/arduinocapa.jpg',
+                    keyword: 'midia03',
+                }
+            ];
+
+            const createdProjects = [];
+
+            for (const demo of demos) {
+                const project = await Project.create({
+                    name: demo.name,
+                    description: demo.description,
+                    userId: loggedUser.id,
+                    imageUrl: demo.imageUrl,
+                    isContracted: true
+                });
+
+                const linkCode = uuidv4().replace(/-/g, '').slice(0, 12);
+                const expiresAt = new Date();
+                expiresAt.setDate(expiresAt.getDate() + 30);
+
+                const sharedLink = await SharedLink.create({
+                    projectId: project.id,
+                    userId: loggedUser.id,
+                    linkCode,
+                    keyword: demo.keyword,
+                    expiresAt,
+                    isActive: true
+                });
+
+                await project.update({ codeLink: linkCode });
+
+                createdProjects.push({
+                    project,
+                    sharedLink
+                });
+            }
+
+            return res.status(201).json({
+                message: 'Projetos de demonstração criados com sucesso.',
+                createdProjects
+            });
+
+        } catch (error) {
+            console.error('Erro ao criar projetos demo:', error);
+            res.status(500).json({ error: 'Erro ao criar projetos de demonstração.' });
+        }
     }
+
+
 };

@@ -105,8 +105,6 @@ module.exports = {
         return res.status(404).json({ error: 'Link inválido ou inativo.' });
       }
 
-      console.log('Agora:', new Date());
-      console.log('expiresAt:', new Date(link.expiresAt));
 
       if (link.expiresAt && new Date(link.expiresAt) < new Date()) {
         return res.status(410).json({ error: 'Link expirado.' });
@@ -121,14 +119,14 @@ module.exports = {
 
   async updateExpiresAt(req, res) {
     try {
-      const { guid } = req.params;
+      const { codeLink } = req.params;
       const { expiresAt } = req.body;
 
       if (!expiresAt) {
         return res.status(400).json({ error: 'O campo expiresAt é obrigatório.' });
       }
 
-      const link = await SharedLink.findOne({ where: { guid } });
+      const link = await SharedLink.findOne({ where: { linkCode : codeLink } });
 
       if (!link) {
         return res.status(404).json({ error: 'Link de compartilhamento não encontrado.' });

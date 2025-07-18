@@ -12,8 +12,8 @@ module.exports = {
                 password,
                 displayName,
                 photoUrl = null, // Valor opcional com padrão nulo
-                userTypeId = 1,  // Valor padrão para userTypeId
-                profileId = 1
+                userTypeId = 2,  // Valor padrão para userTypeId
+                profileId = 1   // Valor padrão para profileId
             } = req.body;
 
             const existingUser = await User.findOne({ where: { email } });
@@ -63,19 +63,13 @@ module.exports = {
                 return res.status(401).json({ error: 'Senha incorreta' });
             }
 
-            // const role =
-            //     user.userTypeId === 3 ? 'owner' :
-            //         user.userTypeId === 2 ? 'user' :
-            //             'visitor';
-
-
             const token = jwt.sign(
                 {
                     id: user.id,
                     guid: user.guid,
                     email: user.email,
                     userTypeId: user.userTypeId,
-                    profileId: user.profileId,                    
+                    profileId: user.profileId,
                     role: user.UserType?.name || null
                 },
                 SECRET,
@@ -92,9 +86,9 @@ module.exports = {
                     displayName: user.displayName,
                     photoUrl: user.photoUrl,
                     userTypeId: user.userTypeId,
-                    profileId: user.profileId,   
-                    userType: user.UserType?.code || null,   
-                    profile: user.Profile?.code || null,              
+                    profileId: user.profileId,
+                    userType: user.UserType?.code || null,
+                    profile: user.Profile?.code || null,
                     role: user.UserType?.name || null
                 },
             });
@@ -116,6 +110,7 @@ module.exports = {
                 photoUrl: user.photoUrl,
                 userTypeId: user.userTypeId,
                 profileId: user.profileId,
+                role: user.role || null,
                 createdAt: user.createdAt,
                 updatedAt: user.updatedAt,
             });

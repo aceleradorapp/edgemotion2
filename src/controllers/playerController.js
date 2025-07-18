@@ -8,7 +8,7 @@ class PlayerController {
 
     getPlayer = async (req, res) => {
         const { guid } = req.body;
-        const keyword = await getKeywordByGuid(guid);   // endpoint do service e da controller     
+        const keyword = await getKeywordByGuid(guid);   // endpoint do service e da controller  verifica se expirou ou não o link   
         const urlApiMaster = URLAPI+'/uploads/packages/';
         const htmlPath = path.join(__dirname, '../../public/player1/index.html');
 
