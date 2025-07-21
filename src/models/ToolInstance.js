@@ -20,6 +20,13 @@ module.exports = (sequelize, DataTypes) => {
     description: { type: DataTypes.TEXT },
     dataUrl: { type: DataTypes.STRING, allowNull: false }, // URL da pasta com os dados
     orderNumber : { type: DataTypes.INTEGER }, // ordem dentro do projeto
+    routePage: { type: DataTypes.STRING, allowNull: true },
+    codeTool: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      defaultValue: () => uuidv4().replace(/-/g, '').slice(0, 12) // Ex: 12 caracteres únicos
+    },
   }, {
     tableName: 'tool_instances',
     timestamps: true,
@@ -27,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
 
   ToolInstance.associate = (models) => {
     ToolInstance.belongsTo(models.Project, { foreignKey: 'projectId' });
-    ToolInstance.hasMany(models.ToolResult, { foreignKey: 'toolInstanceId' });
+    ToolInstance.hasMany(models.ToolResult, { foreignKey: 'toolInstanceId' });    
   };
 
   return ToolInstance;

@@ -8,6 +8,7 @@ router.use(authenticateToken);
 
 router.get('/', toolInstanceController.index);
 router.get('/project/:projectId', toolInstanceController.index); // listar ferramentas do projeto
+router.get('/project/getLink/:projectId', toolInstanceController.getToolByIdProject); // obter ferramentas por ID do projeto
 router.post('/', toolInstanceController.create); // criar ferramenta
 router.get('/:id', toolInstanceController.show);
 router.put('/:id', toolInstanceController.update); // atualizar ferramenta

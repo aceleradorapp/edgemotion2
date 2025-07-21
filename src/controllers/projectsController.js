@@ -1,5 +1,5 @@
 // src/controllers/projectsController.js
-const { Project } = require('../models');
+const { Project, ToolInstance } = require('../models');
 
 module.exports = {
   async index(req, res) {
@@ -43,7 +43,14 @@ module.exports = {
       const projects = await Project.findAll({
         where: {
           userId: req.user.id,
+        },
+        include: [        
+        {
+            model: ToolInstance,
+            attributes: ['id', 'guid', 'toolType', 'title', 'description', 'dataUrl', 'orderNumber', 'routePage', 'codeTool'],
+            required: false
         }
+    ]
       });
       res.json(projects);
     } catch (error) {

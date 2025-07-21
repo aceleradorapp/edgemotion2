@@ -1,5 +1,5 @@
 // src/controllers/contractedProjectsController.js
-const { Project, SharedLink } = require('../models');
+const { Project, SharedLink, ToolInstance } = require('../models');
 const { Op, col, where } = require('sequelize');
 const { v4: uuidv4 } = require('uuid');
 
@@ -82,10 +82,15 @@ module.exports = {
                     {
                         model: SharedLink,
                         attributes: sharedLinkAttributes,
-                        where: { 
-                            isActive: true, 
-                            linkCode: where(col('SharedLinks.linkCode'), '=', col('Project.codeLink')) 
+                        where: {
+                            isActive: true,
+                            linkCode: where(col('SharedLinks.linkCode'), '=', col('Project.codeLink'))
                         },
+                        required: false
+                    },
+                    {
+                        model: ToolInstance,
+                        attributes: ['id', 'guid', 'toolType', 'title', 'description', 'dataUrl', 'orderNumber', 'routePage', 'codeTool'],
                         required: false
                     }
                 ]

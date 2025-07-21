@@ -1,5 +1,5 @@
 // src/controllers/projectParticipantController.js
-const { ProjectParticipant, Project, SharedLink } = require('../models');
+const { ProjectParticipant, Project, SharedLink, ToolInstance } = require('../models');
 
 module.exports = {
   // Criar participante
@@ -89,37 +89,43 @@ module.exports = {
   },
 
   async listByUser(req, res) {
-  try {
-    const { userId } = req.params;
-    const userType = req.user?.userTypeId;
+    try {
+      const { userId } = req.params;
+      const userType = req.user?.userTypeId;
 
-    const sharedLinkAttributes = userType === 3
-      ? ['guid', 'keyword']
-      : ['guid'];
+      const sharedLinkAttributes = userType === 3
+        ? ['guid', 'keyword']
+        : ['guid'];
 
-    const participants = await ProjectParticipant.findAll({
-      where: { userId },
-      include: [
-        {
-          model: Project,
-          include: [
-            {
-              model: SharedLink,
-              attributes: sharedLinkAttributes,
-              where: { isActive: true },
-              required: false
-            }
-          ]
-        }
-      ]
-    });
+      const participants = await ProjectParticipant.findAll({
+        where: { userId },
+        include: [
+          {
+            model: Project,
+            include: [
+              {
+                model: SharedLink,
+                attributes: sharedLinkAttributes,
+                where: { isActive: true },
+                required: false
+              },
+              {
+                model: ToolInstance,
+                attributes: ['id', 'guid', 'toolType', 'title', 'description', 'dataUrl', 'orderNumber', 'routePage', 'codeTool'],
+                required: false
+              }
 
-    res.json(participants);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erro ao listar projetos do usuário.' });
-  }
-},
+            ]
+          }
+        ]
+      });
+
+      res.json(participants);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Erro ao listar projetos do usuário.' });
+    }
+  },
 
 
   async remove(req, res) {

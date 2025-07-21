@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     name: { type: DataTypes.STRING, allowNull: false },
     description: { type: DataTypes.TEXT },
+    type: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     imageUrl: {
       type: DataTypes.STRING,
       defaultValue: '/uploads/project/default.png' // <-- Linha alterada
@@ -40,6 +44,7 @@ module.exports = (sequelize, DataTypes) => {
     Project.hasMany(models.ToolInstance, { foreignKey: 'projectId' });
     Project.hasMany(models.ProjectParticipant, { foreignKey: 'projectId' });
     Project.hasMany(models.SharedLink, { foreignKey: 'projectId' });
+    Project.hasMany(models.ToolInstance, { foreignKey: 'projectId' });
   };
 
   return Project;
