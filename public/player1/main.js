@@ -608,7 +608,7 @@ function finishedTraining() {
             if (loadAudio.audiosExist == false) return false;
             loadAudio.stop();
 
-            window.parent.postMessage('menu-exit', '*');
+            window.parent.postMessage('finished-training', '*');
         } else {
             modalWindow.hide();
         }
