@@ -47,6 +47,10 @@ module.exports = {
   // LISTAR USUÁRIOS VINCULADOS AO MESMO companyGuid (com filtros e paginação)
   async listAllByCompany(req, res) {
     try {
+
+      if (req.user.role === 'owner') {
+        return module.exports.listAllUsers(req, res);
+      }
       const companyGuid = req.user.guid;
       const { page = 1, limit = 10, search = '' } = req.query;
       const offset = (page - 1) * limit;
@@ -165,8 +169,12 @@ module.exports = {
         // companyGuid não é permitido alterar
       } = req.body;
 
+      const whereClause = req.user.role === 'owner'
+        ? { guid }
+        : { guid, companyGuid: req.user.guid };
+
       const user = await User.findOne({
-        where: { guid, companyGuid: req.user.guid }
+        where: whereClause 
       });
 
       if (!user) {
