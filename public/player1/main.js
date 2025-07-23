@@ -186,6 +186,7 @@ function itemMenuHandler(dataName) {
         loadAudio.stop();
 
         window.parent.postMessage('menu-exit', '*');
+        return;
     } else if (menuitem == 'menu-restore') {
         btnMenuClickHandler();
         //init();
@@ -346,7 +347,7 @@ function init() {
         text: 'Para iniciar, clique no botão OK',
         closeButton: false,
         time: 0,
-        color: '#609b01',
+        color: '#2563eb',
         buttons: [
             'OK',
         ]
