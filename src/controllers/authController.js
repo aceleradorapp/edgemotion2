@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { User, UserType, Profile } = require('../models');
+const { User, UserType, Profile, Message, MessageRecipient } = require('../models');
 
 const SECRET = process.env.JWT_SECRET || 'segredo-super-seguro';
 
@@ -31,6 +31,8 @@ module.exports = {
                 userTypeId,
                 profileId,
             });
+
+            await sendUserRegistrationMessage(newUser);
 
             return res.status(201).json({
                 message: 'Usuário criado com sucesso'
@@ -118,6 +120,33 @@ module.exports = {
             console.error(error);
             return res.status(500).json({ error: 'Erro ao buscar dados do usuário' });
         }
-    }
+    },    
 
 };
+
+async function sendUserRegistrationMessage(newUser) {
+        try {
+            const senderId = 1; // ID fixo do administrador
+
+            const title = `Novo usuário registrado: ${newUser.displayName}`;
+            const content = `
+Novo usuário criado no sistema:
+
+- Nome: ${newUser.displayName}
+- Email: ${newUser.email}
+- Tipo de Usuário: ${newUser.userTypeId}
+- Perfil: ${newUser.profileId}
+${newUser.photoUrl ? `- Foto: ${newUser.photoUrl}` : ''}
+        `.trim();
+
+            const message = await Message.create({ senderId, title, content });
+
+            await MessageRecipient.create({
+                messageId: message.id,
+                recipientId: [senderId]
+            });
+
+        } catch (err) {
+            console.error('Erro ao enviar mensagem para o administrador:', err);
+        }
+    }
