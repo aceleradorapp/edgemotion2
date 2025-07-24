@@ -92,7 +92,7 @@ router.post('/:type', authenticateToken, upload.single('image'), async (req, res
       if (!project) {
         return res.status(404).json({ error: 'Projeto não encontrado ou sem permissão.' });
       }
-console.log(project)
+
       await project.update({ imageUrl });
     }
 

@@ -8,7 +8,8 @@
     "seed:types": "node seeders/seedUserTypes.js",
     "seed:profiles": "node seeders/seedProfiles.js",
     "seed:component-categories": "node seeders/seedComponentCategories.js",
-    "seed:components": "node seeders/seedComponents.js"
+    "seed:components": "node seeders/seedComponents.js",
+    "seed:menu-items": "node seeders/seedMenuItems.js"
   },
   "keywords": [],
   "author": "",
