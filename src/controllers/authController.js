@@ -12,7 +12,7 @@ module.exports = {
                 password,
                 displayName,
                 photoUrl = null, // Valor opcional com padrão nulo
-                userTypeId = 2,  // Valor padrão para userTypeId
+                userTypeId = 1,  // Valor padrão para userTypeId
                 profileId = 1   // Valor padrão para profileId
             } = req.body;
 
