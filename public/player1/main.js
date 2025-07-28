@@ -597,7 +597,7 @@ function finishedTraining() {
         text: 'Clique em ok para sair da simulação',
         closeButton: false,
         time: 0,
-        color: '#609b01',
+        color: '#2563eb',
         buttons: [
             'OK'
         ]

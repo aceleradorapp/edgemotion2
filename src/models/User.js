@@ -25,6 +25,10 @@ module.exports = (sequelize, DataTypes) => {
     profileId: {
       type: DataTypes.INTEGER,
       references: { model: 'profiles', key: 'id' }
+    },
+    emailVerifiedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
     }
   }, {
     tableName: 'users',

@@ -120,16 +120,20 @@ module.exports = {
             console.error(error);
             return res.status(500).json({ error: 'Erro ao buscar dados do usuário' });
         }
-    },    
+    },
+
+    
+
+
 
 };
 
 async function sendUserRegistrationMessage(newUser) {
-        try {
-            const senderId = 1; // ID fixo do administrador
+    try {
+        const senderId = 1; // ID fixo do administrador
 
-            const title = `Novo usuário registrado: ${newUser.displayName}`;
-            const content = `
+        const title = `Novo usuário registrado: ${newUser.displayName}`;
+        const content = `
 Novo usuário criado no sistema:
 
 - Nome: ${newUser.displayName}
@@ -139,14 +143,14 @@ Novo usuário criado no sistema:
 ${newUser.photoUrl ? `- Foto: ${newUser.photoUrl}` : ''}
         `.trim();
 
-            const message = await Message.create({ senderId, title, content });
+        const message = await Message.create({ senderId, title, content });
 
-            await MessageRecipient.create({
-                messageId: message.id,
-                recipientId: [senderId]
-            });
+        await MessageRecipient.create({
+            messageId: message.id,
+            recipientId: [senderId]
+        });
 
-        } catch (err) {
-            console.error('Erro ao enviar mensagem para o administrador:', err);
-        }
+    } catch (err) {
+        console.error('Erro ao enviar mensagem para o administrador:', err);
     }
+}
