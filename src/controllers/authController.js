@@ -91,6 +91,14 @@ module.exports = {
                 return res.status(404).json({ error: 'Usuário não encontrado' });
             }
 
+            if (!user.active) {
+                return res.status(403).json({ error: 'Usuário inativo' });
+            }
+
+            if (!user.emailVerifiedAt) {
+                return res.status(403).json({ error: 'E-mail ainda não verificado' });
+            }
+
             const isPasswordValid = await bcrypt.compare(password, user.password);
 
             if (!isPasswordValid) {
