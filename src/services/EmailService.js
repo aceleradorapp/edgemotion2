@@ -2,10 +2,10 @@ const nodemailer = require('nodemailer');
 const { EmailConfig } = require('../models');
 
 class EmailService {
-  static async sendEmail({ companyGuid, to, subject, html }) {
+  static async sendEmail({ to, subject, html }) {
     try {
       const config = await EmailConfig.findOne({
-        where: { companyGuid, isActive: true },
+        where: { isActive: true },
       });
 
       if (!config) throw new Error('Configuração de e-mail não encontrada ou inativa');

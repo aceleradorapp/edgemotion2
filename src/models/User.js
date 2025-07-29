@@ -29,6 +29,10 @@ module.exports = (sequelize, DataTypes) => {
     emailVerifiedAt: {
       type: DataTypes.DATE,
       allowNull: true,
+    },
+    active: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     }
   }, {
     tableName: 'users',

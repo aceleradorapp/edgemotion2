@@ -1,8 +1,12 @@
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const { User, UserType, Profile, Message, MessageRecipient } = require('../models');
+const { User, UserType, Profile, Message, MessageRecipient, EmailVerificationToken } = require('../models');
+const EmailService = require('../services/EmailService');
+const moment = require('moment');
 
 const SECRET = process.env.JWT_SECRET || 'segredo-super-seguro';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 module.exports = {
     async register(req, res) {
@@ -30,6 +34,34 @@ module.exports = {
                 photoUrl,
                 userTypeId,
                 profileId,
+            });
+
+            // Geração e salvamento do token de verificação de e-mail
+            const verificationToken = crypto.randomBytes(32).toString('hex'); // Token aleatório
+            const tokenHash = crypto.createHash('sha256').update(verificationToken).digest('hex'); // Hash para armazenar
+            const expiresAt = moment().add(1, 'hour').toDate(); // Token expira em 1 hora
+
+            await EmailVerificationToken.create({
+                userId: newUser.id,
+                tokenHash: tokenHash,
+                expiresAt: expiresAt,
+            });
+
+            // Montagem do link de verificação
+            const verificationLink = `${FRONTEND_URL}/verify-email?token=${verificationToken}&userId=${newUser.id}`;
+
+            // Envio do e-mail de verificação
+            await EmailService.sendEmail({
+                to: newUser.email,
+                subject: 'Ative sua conta EdgeMotion',
+                html: `
+                    <p>Olá ${newUser.displayName},</p>
+                    <p>Obrigado por se cadastrar na EdgeMotion! Para ativar sua conta, por favor clique no link abaixo:</p>
+                    <p><a href="${verificationLink}">Ativar minha conta</a></p>
+                    <p>Este link de ativação expirará em 1 hora.</p>
+                    <p>Se você não solicitou este cadastro, por favor ignore este e-mail.</p>
+                    <p>Atenciosamente,<br>Equipe EdgeMotion</p>
+                `,
             });
 
             await sendUserRegistrationMessage(newUser);
@@ -122,7 +154,59 @@ module.exports = {
         }
     },
 
-    
+    async verifyEmail(req, res) {
+        try {
+            const { token, userId } = req.query; // Recebe o token e o userId da query string
+
+            if (!token || !userId) {
+                return res.status(400).json({ error: 'Token ou ID de usuário ausente.' });
+            }
+
+            const user = await User.findByPk(userId);
+
+            if (!user) {
+                return res.status(404).json({ error: 'Usuário não encontrado.' });
+            }
+
+            console.log('Usuário encontrado:', user.email);
+            if (user.emailVerifiedAt) {
+                return res.status(400).json({ error: 'E-mail já verificado para este usuário.' });
+            }
+
+            const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+            const verificationRecord = await EmailVerificationToken.findOne({
+                where: {
+                    userId: userId,
+                    tokenHash: tokenHash,
+                    usedAt: null, // Garante que o token não foi usado
+                },
+            });
+
+            if (!verificationRecord) {
+                return res.status(400).json({ error: 'Token de verificação inválido ou já utilizado.' });
+            }
+
+            if (moment().isAfter(verificationRecord.expiresAt)) {
+                return res.status(400).json({ error: 'Token de verificação expirado.' });
+            }
+
+            // Marca o e-mail como verificado no usuário
+            user.emailVerifiedAt = new Date();
+            await user.save();
+
+            // Marca o token de verificação como usado
+            verificationRecord.usedAt = new Date();
+            await verificationRecord.save();
+
+            // Resposta de sucesso (status 200, com 'message')
+            return res.status(200).json({ message: 'E-mail verificado com sucesso!' });
+        } catch (error) {
+            console.error('Erro ao verificar e-mail:', error);
+            // Resposta de erro genérica (status 500, com 'error')
+            return res.status(500).json({ error: 'Erro ao verificar e-mail.' });
+        }
+    },
 
 
 
