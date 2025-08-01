@@ -27,6 +27,7 @@ const messageRoutes = require('./src/routes/messageRoutes');
 const menuItemRoutes = require('./src/routes/menuItemRoutes');
 const emailConfigRoutes = require('./src/routes/emailConfigRoutes');
 const publicRoutes = require('./src/routes/publicRoutes');
+const packageRoutes = require('./src/routes/packageRoutes');
 
 
 const swaggerDocument = YAML.load(path.join(__dirname, 'openapi.yaml'));
@@ -62,6 +63,7 @@ app.use('/api', usersRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/menu-items', menuItemRoutes);
 app.use('/api/email-config', emailConfigRoutes);
+app.use('/api', packageRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // acessar imagem via URL pública
