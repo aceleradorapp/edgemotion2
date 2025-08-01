@@ -26,6 +26,7 @@ const usersRoutes = require('./src/routes/usersRoutes');
 const messageRoutes = require('./src/routes/messageRoutes');
 const menuItemRoutes = require('./src/routes/menuItemRoutes');
 const emailConfigRoutes = require('./src/routes/emailConfigRoutes');
+const publicRoutes = require('./src/routes/publicRoutes');
 
 
 const swaggerDocument = YAML.load(path.join(__dirname, 'openapi.yaml'));
@@ -39,6 +40,8 @@ app.use(express.json());
 app.use(cors());
 
 // Routes
+app.use('/api/public', publicRoutes);
+
 app.use('/api/auth', authRoutes);
 app.use('/api/user-types', userTypeRoutes);
 app.use('/api/profiles', profileRoutes);
