@@ -1,3 +1,4 @@
+// src/services/EmailService.js
 const nodemailer = require('nodemailer');
 const { EmailConfig } = require('../models');
 
