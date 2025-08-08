@@ -30,6 +30,7 @@ const publicRoutes = require('./src/routes/publicRoutes');
 const packageRoutes = require('./src/routes/packageRoutes');
 const audioRoutes = require('./src/routes/audioRoutes');
 const evaluationRoutes = require('./src/routes/evaluationRoutes');
+const assignmentRoutes = require('./src/routes/assignmentRoutes'); 
 
 
 const swaggerDocument = YAML.load(path.join(__dirname, 'openapi.yaml'));
@@ -68,6 +69,7 @@ app.use('/api/email-config', emailConfigRoutes);
 app.use('/api', packageRoutes);
 app.use('/api', audioRoutes);
 app.use('/api', evaluationRoutes);
+app.use('/api', assignmentRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // acessar imagem via URL pública
@@ -87,8 +89,8 @@ const db = require('./src/models');
 db.sequelize.authenticate()
   .then(() => {
     console.log('Conexão com banco de dados estabelecida com sucesso.');
-    //return db.sequelize.sync({ alter: true });
-    return db.sequelize.sync();
+    return db.sequelize.sync({ alter: true });
+    //return db.sequelize.sync();
   })
   .then(() => {
     console.log('Tabelas sincronizadas com sucesso!');

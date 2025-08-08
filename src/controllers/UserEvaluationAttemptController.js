@@ -158,7 +158,23 @@ const UserEvaluationAttemptController = {
       }
       return res.status(500).json({ error: 'Erro ao buscar o resultado da avaliação.' });
     }
-  }
+  },
+
+  async getRanking(req, res) {
+    try {
+      const { evaluationGuid } = req.params;
+      
+      const ranking = await UserEvaluationAttemptService.getEvaluationRanking(evaluationGuid);
+
+      return res.json({
+        total: ranking.length,
+        ranking: ranking
+      });
+    } catch (error) {
+      console.error('Erro ao gerar ranking:', error);
+      return res.status(500).json({ error: error.message || 'Erro ao gerar o ranking.' });
+    }
+  },
 
 };
 

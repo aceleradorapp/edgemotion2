@@ -64,6 +64,38 @@ const EvaluationController = {
         }
     },
 
+    async duplicate(req, res) {
+        try {
+            const { guid } = req.params;
+            const { userGuid } = req.body;
+            const requestingUserRole = req.user.role;
+            const requestingUserId = req.user.id;
+
+            // Validação de permissão: Apenas o 'owner' pode usar esta funcionalidade
+            if (requestingUserRole !== 'owner') {
+                return res.status(403).json({ error: 'Permissão negada. Apenas o proprietário pode duplicar avaliações.' });
+            }
+
+            // 1. Encontrar o usuário de destino para obter a companyGuid
+            const destinationUser = await require('../models').User.findOne({ where: { guid: userGuid } });
+            if (!destinationUser) {
+                return res.status(404).json({ error: 'Usuário de destino não encontrado.' });
+            }
+
+            // 2. Chamar o serviço para duplicar a avaliação
+            const newEvaluation = await EvaluationService.duplicateEvaluation(guid, destinationUser.guid, destinationUser.id);
+
+            return res.status(201).json({
+                message: 'Avaliação duplicada com sucesso!',
+                evaluation: newEvaluation,
+            });
+
+        } catch (error) {
+            console.error('Erro ao duplicar avaliação:', error);
+            return res.status(500).json({ error: error.message || 'Erro ao duplicar a avaliação.' });
+        }
+    },
+
     /**
      * @route GET /api/evaluations
      * @description Lista todas as avaliações com filtros. (Apenas Admin/Gerenciamento)
@@ -73,17 +105,25 @@ const EvaluationController = {
         try {
             const userCompanyGuid = req.user.guid;
             const userRole = req.user.role;
+            const userProfileId = req.user.profileId;
             const { page, limit, search, companyGuid } = req.query;
 
             const options = { page, limit, search };
 
             // Lógica de filtragem por companyGuid baseada no papel do usuário
-            if (userRole === 'owner') { // Super-admin pode filtrar por qualquer companyGuid
-                options.companyGuid = companyGuid;
-            } else if (userCompanyGuid) { // Usuários de empresa só veem as suas
-                options.companyGuid = userCompanyGuid;
+            // if (userRole === 'owner') { // Super-admin pode filtrar por qualquer companyGuid
+            //     options.companyGuid = companyGuid;
+            // } else if (userCompanyGuid) { // Usuários de empresa só veem as suas
+            //     options.companyGuid = userCompanyGuid;
+            // } else {
+            //     return res.status(403).json({ error: 'Permissão negada. CompanyGuid é necessário.' });
+            // }
+            if (userRole === 'owner') {
+                options.companyGuid = companyGuid; // Owner pode filtrar por qualquer companyGuid
+            } else if (userRole === 'admin' || (userRole === 'user' && userProfileId === 1)) {
+                options.companyGuid = userCompanyGuid; // Admin e o novo perfil só veem as suas
             } else {
-                return res.status(403).json({ error: 'Permissão negada. CompanyGuid é necessário.' });
+                return res.status(403).json({ error: 'Permissão negada para listar avaliações.' });
             }
 
             const evaluations = await EvaluationService.getAllEvaluations(options);
@@ -117,6 +157,7 @@ const EvaluationController = {
         try {
             const { guid } = req.params;
             const userCompanyGuid = req.user.guid;
+            const userProfileId = req.user.profileId;
             const userRole = req.user.role;
 
             const evaluation = await EvaluationService.getEvaluationByGuid(guid);
@@ -126,7 +167,13 @@ const EvaluationController = {
             }
 
             // Validação de permissão: super-admin ou usuário da empresa dona da avaliação
-            if (userRole !== 'owner' && evaluation.companyGuid !== userCompanyGuid) {
+            // if (userRole !== 'owner' && evaluation.companyGuid !== userCompanyGuid) {
+            //     return res.status(403).json({ error: 'Permissão negada para acessar esta avaliação.' });
+            // }
+
+            if (userRole === 'owner' || (userRole === 'admin' && evaluation.companyGuid === userCompanyGuid) || (userRole === 'user' && userProfileId === 1 && evaluation.companyGuid === userCompanyGuid)) {
+                return res.json({ evaluation });
+            } else {
                 return res.status(403).json({ error: 'Permissão negada para acessar esta avaliação.' });
             }
 

@@ -132,6 +132,20 @@ async function seedMenuItems() {
             "updatedAt": "2025-08-04T14:37:19.000Z"
         },
         {
+            "id": 30,
+            "guid": "31c174db-c0a6-4a22-a013-7c8fcbf7ea97",
+            "name": "Adicionar Avaliação a um usuário",
+            "icon": "UserCircle2",
+            "type": "link",
+            "pathOrAction": "/assignments/new",
+            "highlight": false,
+            "position": 10,
+            "userTypeId": 2,
+            "profileId": 1,
+            "createdAt": "2025-08-06T18:28:30.000Z",
+            "updatedAt": "2025-08-08T12:19:10.000Z"
+        },
+        {
             "id": 22,
             "guid": "fd56abf8-aee7-4e24-899e-d53a2bb525c6",
             "name": "MENU-DIVIDER",
@@ -139,11 +153,11 @@ async function seedMenuItems() {
             "type": "action",
             "pathOrAction": "",
             "highlight": false,
-            "position": 10,
+            "position": 11,
             "userTypeId": 1,
             "profileId": 1,
             "createdAt": "2025-08-05T18:57:09.000Z",
-            "updatedAt": "2025-08-05T18:57:09.000Z"
+            "updatedAt": "2025-08-08T12:19:57.000Z"
         },
         {
             "id": 10,
@@ -153,11 +167,11 @@ async function seedMenuItems() {
             "type": "link",
             "pathOrAction": "/create-training-link",
             "highlight": false,
-            "position": 11,
+            "position": 12,
             "userTypeId": 2,
             "profileId": 1,
             "createdAt": "2025-08-04T14:37:19.000Z",
-            "updatedAt": "2025-08-05T18:59:07.000Z"
+            "updatedAt": "2025-08-08T12:19:57.000Z"
         },
         {
             "id": 28,
@@ -167,11 +181,11 @@ async function seedMenuItems() {
             "type": "link",
             "pathOrAction": "/evaluations/create",
             "highlight": false,
-            "position": 12,
-            "userTypeId": 3,
+            "position": 13,
+            "userTypeId": 2,
             "profileId": 1,
             "createdAt": "2025-08-05T19:08:24.000Z",
-            "updatedAt": "2025-08-05T19:09:11.000Z"
+            "updatedAt": "2025-08-08T12:19:57.000Z"
         },
         {
             "id": 29,
@@ -181,11 +195,11 @@ async function seedMenuItems() {
             "type": "link",
             "pathOrAction": "/my-quizzes",
             "highlight": false,
-            "position": 13,
-            "userTypeId": 3,
+            "position": 14,
+            "userTypeId": 1,
             "profileId": 1,
             "createdAt": "2025-08-05T19:10:37.000Z",
-            "updatedAt": "2025-08-05T19:11:31.000Z"
+            "updatedAt": "2025-08-08T12:19:57.000Z"
         },
         {
             "id": 11,
@@ -195,11 +209,11 @@ async function seedMenuItems() {
             "type": "link",
             "pathOrAction": "/create-message",
             "highlight": false,
-            "position": 14,
+            "position": 15,
             "userTypeId": 2,
             "profileId": 1,
             "createdAt": "2025-08-04T14:37:19.000Z",
-            "updatedAt": "2025-08-05T19:11:31.000Z"
+            "updatedAt": "2025-08-08T12:19:57.000Z"
         },
         {
             "id": 13,
@@ -209,11 +223,11 @@ async function seedMenuItems() {
             "type": "link",
             "pathOrAction": "/metricas",
             "highlight": false,
-            "position": 15,
+            "position": 16,
             "userTypeId": 2,
             "profileId": 1,
             "createdAt": "2025-08-04T14:37:19.000Z",
-            "updatedAt": "2025-08-05T19:11:31.000Z"
+            "updatedAt": "2025-08-08T12:19:57.000Z"
         },
         {
             "id": 12,
@@ -223,11 +237,11 @@ async function seedMenuItems() {
             "type": "link",
             "pathOrAction": "/certificados-emitidos",
             "highlight": false,
-            "position": 16,
+            "position": 17,
             "userTypeId": 2,
             "profileId": 1,
             "createdAt": "2025-08-04T14:37:19.000Z",
-            "updatedAt": "2025-08-05T19:11:31.000Z"
+            "updatedAt": "2025-08-08T12:19:57.000Z"
         },
         {
             "id": 23,
@@ -237,11 +251,11 @@ async function seedMenuItems() {
             "type": "action",
             "pathOrAction": "",
             "highlight": false,
-            "position": 17,
+            "position": 18,
             "userTypeId": 1,
             "profileId": 1,
             "createdAt": "2025-08-05T18:58:13.000Z",
-            "updatedAt": "2025-08-05T19:11:31.000Z"
+            "updatedAt": "2025-08-08T12:19:57.000Z"
         },
         {
             "id": 16,
@@ -251,11 +265,11 @@ async function seedMenuItems() {
             "type": "link",
             "pathOrAction": "/manage-menu-items",
             "highlight": false,
-            "position": 18,
+            "position": 19,
             "userTypeId": 3,
             "profileId": 1,
             "createdAt": "2025-08-04T14:37:19.000Z",
-            "updatedAt": "2025-08-05T19:11:31.000Z"
+            "updatedAt": "2025-08-08T12:19:57.000Z"
         },
         {
             "id": 17,
@@ -265,11 +279,11 @@ async function seedMenuItems() {
             "type": "link",
             "pathOrAction": "/manage-users",
             "highlight": false,
-            "position": 19,
+            "position": 20,
             "userTypeId": 3,
             "profileId": 1,
             "createdAt": "2025-08-04T14:37:19.000Z",
-            "updatedAt": "2025-08-05T19:11:32.000Z"
+            "updatedAt": "2025-08-08T12:19:57.000Z"
         },
         {
             "id": 19,
@@ -279,11 +293,11 @@ async function seedMenuItems() {
             "type": "link",
             "pathOrAction": "/manage-user-roles",
             "highlight": false,
-            "position": 20,
+            "position": 21,
             "userTypeId": 3,
             "profileId": 1,
             "createdAt": "2025-08-04T14:37:19.000Z",
-            "updatedAt": "2025-08-05T19:11:32.000Z"
+            "updatedAt": "2025-08-08T12:19:57.000Z"
         },
         {
             "id": 25,
@@ -293,11 +307,11 @@ async function seedMenuItems() {
             "type": "link",
             "pathOrAction": "/admin/email-settings",
             "highlight": false,
-            "position": 21,
+            "position": 22,
             "userTypeId": 3,
             "profileId": 1,
             "createdAt": "2025-08-05T19:04:21.000Z",
-            "updatedAt": "2025-08-05T19:11:32.000Z"
+            "updatedAt": "2025-08-08T12:19:57.000Z"
         },
         {
             "id": 26,
@@ -307,11 +321,11 @@ async function seedMenuItems() {
             "type": "link",
             "pathOrAction": "/project-tools-manager",
             "highlight": false,
-            "position": 22,
+            "position": 23,
             "userTypeId": 3,
             "profileId": 1,
             "createdAt": "2025-08-05T19:05:30.000Z",
-            "updatedAt": "2025-08-05T19:11:32.000Z"
+            "updatedAt": "2025-08-08T12:19:57.000Z"
         },
         {
             "id": 27,
@@ -321,11 +335,109 @@ async function seedMenuItems() {
             "type": "link",
             "pathOrAction": "/evaluations",
             "highlight": false,
-            "position": 23,
+            "position": 24,
             "userTypeId": 3,
             "profileId": 1,
             "createdAt": "2025-08-05T19:07:31.000Z",
-            "updatedAt": "2025-08-05T19:11:32.000Z"
+            "updatedAt": "2025-08-08T12:19:57.000Z"
+        },
+        {
+            "id": 37,
+            "guid": "078e1a6f-3023-4617-81c6-0f5fb0c24b2b",
+            "name": "Duplicar Avaliação para Usuarios",
+            "icon": "Settings",
+            "type": "link",
+            "pathOrAction": "/evaluations/duplicate",
+            "highlight": false,
+            "position": 25,
+            "userTypeId": 3,
+            "profileId": 1,
+            "createdAt": "2025-08-08T12:44:47.000Z",
+            "updatedAt": "2025-08-08T12:45:09.000Z"
+        },
+        {
+            "id": 33,
+            "guid": "d9a32655-16e4-451d-ba96-1584f73ca28b",
+            "name": "MENU-DIVIDER",
+            "icon": "LayoutDashboard",
+            "type": "action",
+            "pathOrAction": "",
+            "highlight": false,
+            "position": 26,
+            "userTypeId": 3,
+            "profileId": 1,
+            "createdAt": "2025-08-07T13:13:58.000Z",
+            "updatedAt": "2025-08-08T12:45:09.000Z"
+        },
+        {
+            "id": 36,
+            "guid": "ebc95e18-0c0d-4037-b42d-895550c05fc9",
+            "name": "Ranking Usuários Avaliação",
+            "icon": "Users",
+            "type": "link",
+            "pathOrAction": "/admin/ranking",
+            "highlight": false,
+            "position": 27,
+            "userTypeId": 3,
+            "profileId": 1,
+            "createdAt": "2025-08-07T13:31:36.000Z",
+            "updatedAt": "2025-08-08T12:45:09.000Z"
+        },
+        {
+            "id": 31,
+            "guid": "3b2661df-fd58-4560-b250-0d4f1706625d",
+            "name": "Relatorio Avaliações",
+            "icon": "FileText",
+            "type": "link",
+            "pathOrAction": "/admin/evaluation-reports",
+            "highlight": false,
+            "position": 28,
+            "userTypeId": 3,
+            "profileId": 1,
+            "createdAt": "2025-08-06T18:44:20.000Z",
+            "updatedAt": "2025-08-08T12:45:09.000Z"
+        },
+        {
+            "id": 32,
+            "guid": "04aa1837-1178-4171-af85-e7d95895a255",
+            "name": "Relatorio de metricas por Usuário",
+            "icon": "Percent",
+            "type": "link",
+            "pathOrAction": "admin/user-List-For-Reports",
+            "highlight": false,
+            "position": 29,
+            "userTypeId": 3,
+            "profileId": 1,
+            "createdAt": "2025-08-07T13:13:02.000Z",
+            "updatedAt": "2025-08-08T12:45:09.000Z"
+        },
+        {
+            "id": 35,
+            "guid": "2db94b81-5d87-4c58-849f-595decae40ab",
+            "name": "MENU-DIVIDER",
+            "icon": "LayoutDashboard",
+            "type": "action",
+            "pathOrAction": "",
+            "highlight": false,
+            "position": 30,
+            "userTypeId": 3,
+            "profileId": 1,
+            "createdAt": "2025-08-07T13:18:11.000Z",
+            "updatedAt": "2025-08-08T12:45:09.000Z"
+        },
+        {
+            "id": 34,
+            "guid": "43149495-c79f-4559-9f32-d4c84dfa5e07",
+            "name": "Doc Avaliações Api",
+            "icon": "FileText",
+            "type": "link",
+            "pathOrAction": "/docs/api/evaluations",
+            "highlight": false,
+            "position": 31,
+            "userTypeId": 3,
+            "profileId": 1,
+            "createdAt": "2025-08-07T13:17:52.000Z",
+            "updatedAt": "2025-08-08T12:45:09.000Z"
         }
     ];
 

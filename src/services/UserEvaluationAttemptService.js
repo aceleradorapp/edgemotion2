@@ -1,5 +1,5 @@
 // src/services/userEvaluationAttemptService.js
-const { UserEvaluationAttempt, UserAnswer, Evaluation, Question, User } = require('../models');
+const { UserEvaluationAttempt, UserAnswer, Evaluation, Question, User, UserEvaluationAssignment } = require('../models');
 const { Op } = require('sequelize');
 
 const UserEvaluationAttemptService = {
@@ -142,6 +142,20 @@ const UserEvaluationAttemptService = {
             status: isApproved ? 'passed' : 'failed'
         });
 
+        await attempt.reload({
+            include: [
+                {
+                    model: Evaluation,
+                    as: 'evaluation'
+                },
+                {
+                    model: UserAnswer,
+                    as: 'userAnswers',
+                    include: [{ model: Question, as: 'question' }]
+                }
+            ]
+        });
+
         return attempt;
     },
 
@@ -153,7 +167,7 @@ const UserEvaluationAttemptService = {
     async listUserAttempts(userId) {
         const attempts = await UserEvaluationAttempt.findAll({
             where: { userId },
-            attributes: ['guid', 'status', 'startTime', 'endTime', 'score', 'isApproved'],
+            attributes: ['guid', 'status', 'startTime', 'endTime', 'score', 'isApproved', 'totalTimeTaken'],
             include: [
                 {
                     model: Evaluation,
@@ -193,7 +207,103 @@ const UserEvaluationAttemptService = {
         }
 
         return attempt;
-    }
+    },
+
+    async getAssignedUsersForEvaluation(evaluationGuid) {
+        const assignments = await UserEvaluationAssignment.findAll({
+            where: { evaluationGuid }, // Corrigido para buscar por GUID
+            include: [
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: ['id', 'guid', 'email', 'displayName', 'companyGuid'],
+                },
+            ],
+        });
+        return assignments;
+    },
+
+    /**
+     * Obtém os dados de ranking consolidados para uma avaliação específica.
+     * Ordena por melhor pontuação e desempata por melhor tempo.
+     * @param {string} evaluationGuid - GUID da avaliação.
+     * @returns {Array<Object>} Um ranking ordenado de usuários.
+     */
+    async getEvaluationRanking(evaluationGuid) {
+        const evaluation = await Evaluation.findOne({ where: { guid: evaluationGuid } });
+        if (!evaluation) {
+            throw new Error('Avaliação não encontrada.');
+        }
+
+        const assignedUsers = await UserEvaluationAssignment.findAll({ // Usar o model de atribuição para buscar
+            where: { evaluationId: evaluation.id },
+            include: [{ model: User, as: 'user' }]
+        });
+
+        const consolidatedRanking = await Promise.all(
+            assignedUsers.map(async (assignment) => {
+                const relevantAttempts = await UserEvaluationAttempt.findAll({
+                    where: {
+                        userId: assignment.userId,
+                        evaluationId: evaluation.id,
+                    },
+                    attributes: ['score', 'totalTimeTaken', 'createdAt'],
+                    order: [['createdAt', 'DESC']],
+                });
+
+                if (relevantAttempts.length === 0) {
+                    return {
+                        user: assignment.user,
+                        bestScore: 0,
+                        totalAttempts: 0,
+                        bestTime: Infinity,
+                    };
+                }
+
+                let bestScore = -1;
+                let bestTime = Infinity;
+
+                relevantAttempts.forEach(attempt => {
+                    let attemptTime = attempt.totalTimeTaken;
+                    if (attemptTime === null || attemptTime === undefined) {
+                        if (attempt.startTime && attempt.endTime) {
+                            const start = new Date(attempt.startTime);
+                            const end = new Date(attempt.endTime);
+                            attemptTime = (end.getTime() - start.getTime()) / 1000;
+                        } else {
+                            attemptTime = Infinity;
+                        }
+                    }
+
+                    if (attempt.score > bestScore) {
+                        bestScore = attempt.score;
+                        bestTime = attemptTime;
+                    } else if (attempt.score === bestScore && attemptTime < bestTime) {
+                        bestTime = attemptTime;
+                    }
+                });
+
+                return {
+                    user: assignment.user,
+                    bestScore,
+                    bestTime,
+                    totalAttempts: relevantAttempts.length,
+                };
+            })
+        );
+
+        const sortedRanking = consolidatedRanking.sort((a, b) => {
+            if (b.bestScore !== a.bestScore) {
+                return b.bestScore - a.bestScore;
+            }
+            return a.bestTime - b.bestTime;
+        });
+
+        return sortedRanking;
+    },
+
+
+
 };
 
 module.exports = UserEvaluationAttemptService;

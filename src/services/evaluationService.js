@@ -1,5 +1,5 @@
 // src/services/evaluationService.js
-const { Evaluation, Question } = require('../models');
+const { Evaluation, Question, User } = require('../models');
 const { Op } = require('sequelize');
 const { v4: uuidv4 } = require('uuid');
 
@@ -49,7 +49,7 @@ const EvaluationService = {
             throw new Error('Falha ao criar avaliação e suas questões.');
         }
     },
-  
+
     /**
      * Lista todas as avaliações com opções de filtro e paginação.
      * @param {Object} options - Objeto com filtros (page, limit, search, companyGuid)
@@ -72,7 +72,12 @@ const EvaluationService = {
             offset: parseInt(offset),
             limit: parseInt(limit),
             order: [['createdAt', 'DESC']],
-            attributes: ['id', 'guid', 'name', 'description', 'passingPercentage', 'maxAttempts', 'isActive', 'companyGuid', 'createdAt']
+            attributes: ['id', 'guid', 'name', 'description', 'passingPercentage', 'maxAttempts', 'isActive', 'companyGuid', 'createdAt'],
+            include: [{
+                model: User,
+                as: 'creator',
+                attributes: ['guid', 'displayName', 'email', 'photoUrl']
+            }]
         });
 
         return {
@@ -180,6 +185,61 @@ const EvaluationService = {
             evaluationName: evaluation.name,
             questions: shuffledQuestions
         };
+    },
+
+    async duplicateEvaluation(sourceEvaluationGuid, newCompanyGuid, userId) {
+        const sourceEvaluation = await Evaluation.findOne({
+            where: { guid: sourceEvaluationGuid },
+            include: [
+                {
+                    model: Question,
+                    as: 'questions',
+                    attributes: ['type', 'text', 'options'] // Não precisamos dos GUIDs antigos
+                }
+            ]
+        });
+
+        if (!sourceEvaluation) {
+            throw new Error('Avaliação de origem não encontrada.');
+        }
+
+        const transaction = await Evaluation.sequelize.transaction();
+        try {
+            // 1. Criar a nova avaliação (cópia)
+            const newEvaluation = await Evaluation.create({
+                name: sourceEvaluation.name,
+                description: sourceEvaluation.description,
+                passingPercentage: sourceEvaluation.passingPercentage,
+                maxAttempts: sourceEvaluation.maxAttempts,
+                isActive: sourceEvaluation.isActive,
+                companyGuid: newCompanyGuid,
+                userId: userId,
+            }, { transaction });
+
+            // 2. Duplicar as questões
+            const newQuestions = sourceEvaluation.questions.map(q => {
+                const optionsWithNewGuids = q.options.map(option => ({
+                    ...option,
+                    guid: uuidv4() // Gera novos GUIDs para as opções
+                }));
+                return {
+                    evaluationId: newEvaluation.id,
+                    type: q.type,
+                    text: q.text,
+                    options: optionsWithNewGuids,
+                };
+            });
+
+            await Question.bulkCreate(newQuestions, { transaction });
+
+            await transaction.commit();
+            return newEvaluation;
+
+        } catch (error) {
+            await transaction.rollback();
+            console.error('Erro no service ao duplicar avaliação:', error);
+            throw new Error('Falha ao duplicar a avaliação.');
+        }
     }
 };
 

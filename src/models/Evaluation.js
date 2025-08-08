@@ -40,6 +40,16 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.UUID,
       allowNull: true,
     },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
+    },
   }, {
     tableName: 'evaluations',
     timestamps: true,
@@ -55,6 +65,11 @@ module.exports = (sequelize, DataTypes) => {
     Evaluation.hasMany(models.UserEvaluationAttempt, {
       foreignKey: 'evaluationId',
       as: 'userAttempts'
+    });
+
+    Evaluation.belongsTo(models.User, {
+      foreignKey: 'userId',
+      as: 'creator'
     });
   };
 
