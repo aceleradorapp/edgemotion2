@@ -59,7 +59,7 @@ const UserEvaluationAssignmentController = {
 
       // Validação de permissão: Usuário só pode ver suas próprias atribuições, admins podem ver de qualquer um
       let targetUserId;
-      if (req.user.role === 'owner' || req.user.role === 'admin') {
+      if (req.user.role === 'owner' || req.user.role === 'user') {
         const targetUser = await User.findOne({ where: { guid: userGuid } });
         if (!targetUser) {
           return res.status(404).json({ error: 'Usuário não encontrado.' });
@@ -71,22 +71,26 @@ const UserEvaluationAssignmentController = {
         return res.status(403).json({ error: 'Permissão negada para acessar as atribuições deste usuário.' });
       }
 
-      const assignments = await UserEvaluationAssignmentService.getAssignmentsForUser(targetUserId);
+      const assignmentsWithMetrics = await UserEvaluationAssignmentService.getAssignmentsForUser(targetUserId);
 
+      // return res.json({
+      //   total: assignments.length,
+      //   assignments: assignments.map(a => ({
+      //     guid: a.guid,
+      //     evaluation: {
+      //       guid: a.evaluation.guid,
+      //       name: a.evaluation.name,
+      //       description: a.evaluation.description,
+      //       passingPercentage: a.evaluation.passingPercentage,
+      //       maxAttempts: a.evaluation.maxAttempts,
+      //       isActive: a.evaluation.isActive,
+      //     },
+      //     createdAt: a.createdAt,
+      //   }))
+      // });
       return res.json({
-        total: assignments.length,
-        assignments: assignments.map(a => ({
-          guid: a.guid,
-          evaluation: {
-            guid: a.evaluation.guid,
-            name: a.evaluation.name,
-            description: a.evaluation.description,
-            passingPercentage: a.evaluation.passingPercentage,
-            maxAttempts: a.evaluation.maxAttempts,
-            isActive: a.evaluation.isActive,
-          },
-          createdAt: a.createdAt,
-        }))
+        total: assignmentsWithMetrics.length,
+        assignments: assignmentsWithMetrics
       });
     } catch (error) {
       console.error('Erro ao listar atribuições do usuário:', error);
@@ -104,7 +108,7 @@ const UserEvaluationAssignmentController = {
       const { assignmentGuid } = req.params;
 
       // Validação de permissão
-      if (req.user.role !== 'owner' && req.user.role !== 'admin') {
+      if (req.user.role !== 'owner' && req.user.role !== 'user') {
         return res.status(403).json({ error: 'Permissão negada. Apenas administradores podem remover atribuições.' });
       }
 

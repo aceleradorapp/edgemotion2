@@ -89,8 +89,8 @@ const db = require('./src/models');
 db.sequelize.authenticate()
   .then(() => {
     console.log('Conexão com banco de dados estabelecida com sucesso.');
-    return db.sequelize.sync({ alter: true });
-    //return db.sequelize.sync();
+    //return db.sequelize.sync({ alter: true });
+    return db.sequelize.sync();
   })
   .then(() => {
     console.log('Tabelas sincronizadas com sucesso!');

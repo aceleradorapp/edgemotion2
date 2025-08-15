@@ -1,4 +1,4 @@
-const { UserEvaluationAssignment, User, Evaluation, UserEvaluationAttempt } = require('../models');
+const { UserEvaluationAssignment, User, Evaluation, UserEvaluationAttempt, Message, MessageRecipient } = require('../models');
 const { Op } = require('sequelize');
 
 const UserEvaluationAssignmentService = {
@@ -13,7 +13,8 @@ const UserEvaluationAssignmentService = {
       const { userId, userGuid, evaluationId, evaluationGuid } = data;
 
       let actualUserId;
-      let actualEvaluationId;
+      let actualEvaluationId;      
+      let evaluation;
 
       // Resolver IDs a partir de GUIDs, se fornecidos
       if (userGuid) {
@@ -31,7 +32,7 @@ const UserEvaluationAssignmentService = {
       }
 
       if (evaluationGuid) {
-        const evaluation = await Evaluation.findOne({ where: { guid: evaluationGuid } });
+        evaluation = await Evaluation.findOne({ where: { guid: evaluationGuid } });
         if (!evaluation) {
           console.warn(`Avaliação com GUID ${evaluationGuid} não encontrada. Atribuição ignorada.`);
           continue;
@@ -39,6 +40,7 @@ const UserEvaluationAssignmentService = {
         actualEvaluationId = evaluation.id;
       } else if (evaluationId) {
         actualEvaluationId = evaluationId;
+        evaluation = await Evaluation.findByPk(evaluationId);
       } else {
         console.warn('evaluationId ou evaluationGuid não fornecido para atribuição. Atribuição ignorada.');
         continue;
@@ -63,11 +65,15 @@ const UserEvaluationAssignmentService = {
           evaluationId: actualEvaluationId,
         });
         createdAssignments.push(newAssignment);
+
+        await sendUserRegistrationMessage(actualUserId, evaluation);
+
       } catch (error) {
         console.error(`Erro ao criar atribuição para usuário ${actualUserId}, avaliação ${actualEvaluationId}:`, error);
         // Dependendo da sua necessidade, você pode relançar o erro ou apenas logar
       }
     }
+
     return createdAssignments;
   },
 
@@ -93,13 +99,29 @@ const UserEvaluationAssignmentService = {
       assignments.map(async (assignment) => {
         const userAttempts = await UserEvaluationAttempt.findAll({
           where: { userId: assignment.userId, evaluationId: assignment.evaluationId },
-          attributes: ['status', 'score', 'isApproved', 'createdAt']
+          attributes: ['status', 'score', 'isApproved', 'createdAt'],
+          order: [['createdAt', 'DESC']],
         });
 
         // Lógica para determinar o status e as chances restantes
         const attemptsMade = userAttempts.length;
+
+        // CORREÇÃO: Adicionando verificação para o status 'in_progress'
         const hasPassed = userAttempts.some(a => a.isApproved);
-        const status = hasPassed ? 'passed' : (attemptsMade > 0 ? 'completed' : 'not_started');
+        const inProgress = userAttempts.some(a => a.status === 'in_progress' || a.status === 'started');
+
+        let status;
+        if (hasPassed) {
+          status = 'passed';
+        } else if (inProgress) {
+          status = 'in_progress';
+        } else if (attemptsMade > 0) {
+          status = 'completed';
+        } else {
+          status = 'not_started';
+        }
+
+        // Se maxAttempts for 0, as chances são ilimitadas, caso contrário, calcula as restantes
         const attemptsLeft = assignment.evaluation.maxAttempts === 0
           ? 'Ilimitadas'
           : assignment.evaluation.maxAttempts - attemptsMade;
@@ -109,12 +131,14 @@ const UserEvaluationAssignmentService = {
           status,
           attemptsMade,
           attemptsLeft,
-          // Opcional: Pegar o score da última tentativa
+          // Pega o score da última tentativa, se existir
           lastAttemptScore: attemptsMade > 0 ? userAttempts[0].score : null
         };
       })
     );
-    return assignments;
+
+    // Retornar a variável que contém as métricas calculadas.
+    return assignmentsWithMetrics;
   },
 
   /**
@@ -159,5 +183,33 @@ const UserEvaluationAssignmentService = {
     return assignments;
   },
 };
+
+async function sendUserRegistrationMessage(actualUserId, evaluation) {
+    try {
+        const senderId = actualUserId;
+
+        const title = `Nova Avaliação Vinculada: ${evaluation.name}`;
+        const content = `
+Você tem uma nova avalição vinculada ao seu usário:
+- Avaliação: ${evaluation.name}
+- Descrição: ${evaluation.description || 'Sem descrição'}
+- Total de Tentativas: ${evaluation.maxAttempts}
+- Percentual de Aprovação: ${evaluation.passingPercentage * 100}%
+
+Acesse minhas avaliações no menu para começar a avaliação.
+Obrigado por usar nosso sistema! Se tiver dúvidas, entre em contato com o suporte.
+Boa sorte! `.trim();
+
+        const message = await Message.create({ senderId, title, content });
+
+        await MessageRecipient.create({
+            messageId: message.id,
+            recipientId: [senderId]
+        });
+
+    } catch (err) {
+        console.error('Erro ao enviar mensagem para o administrador:', err);
+    }
+}
 
 module.exports = UserEvaluationAssignmentService;

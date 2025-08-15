@@ -11,6 +11,7 @@ const EvaluationController = {
             const { name, description, passingPercentage, maxAttempts, questions, companyGuid } = req.body;
             const userCompanyGuid = req.user.guid; // Supondo que o companyGuid vem do token do usuário logado
             const userRole = req.user.role; // Supondo que o role vem do token
+            const userId = req.user.id;
 
             // Validação básica de entrada
             if (!name || !passingPercentage || !maxAttempts || !questions || !Array.isArray(questions) || questions.length === 0) {
@@ -35,6 +36,7 @@ const EvaluationController = {
                 maxAttempts,
                 isActive: true, // Ou de acordo com a regra de negócio
                 companyGuid: effectiveCompanyGuid,
+                userId: userId,
                 questions // Passa as questões para o serviço
             };
 

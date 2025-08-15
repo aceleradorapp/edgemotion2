@@ -1,5 +1,6 @@
 const UserEvaluationAttemptService = require('../services/UserEvaluationAttemptService');
 const EvaluationService = require('../services/evaluationService'); // Precisamos dele para preparar as questões
+const { User } = require('../models');
 
 const UserEvaluationAttemptController = {
   /**
@@ -116,8 +117,14 @@ const UserEvaluationAttemptController = {
   async listUserAttempts(req, res) {
     try {
       const userId = req.user.id;
+      const userGuid = req.params.userGuid;
 
-      const attempts = await UserEvaluationAttemptService.listUserAttempts(userId);
+      const user = await User.findOne({
+        where: { guid: userGuid },
+        attributes: ['id'], // retorna apenas o id
+      });
+
+      const attempts = await UserEvaluationAttemptService.listUserAttempts(user.id);
 
       return res.json({
         total: attempts.length,
@@ -163,7 +170,7 @@ const UserEvaluationAttemptController = {
   async getRanking(req, res) {
     try {
       const { evaluationGuid } = req.params;
-      
+
       const ranking = await UserEvaluationAttemptService.getEvaluationRanking(evaluationGuid);
 
       return res.json({
