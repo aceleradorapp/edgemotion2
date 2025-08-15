@@ -42,6 +42,13 @@ module.exports = (sequelize, DataTypes) => {
   User.associate = (models) => {
     User.belongsTo(models.UserType, { foreignKey: 'userTypeId' });
     User.belongsTo(models.Profile, { foreignKey: 'profileId' });
+    User.hasMany(models.AiConfig, { foreignKey: 'userId', as: 'aiConfigs' });
+    User.belongsToMany(models.AiPlugin, {
+      through: models.UserPluginAccess,
+      foreignKey: 'userId',
+      otherKey: 'aiPluginId',
+      as: 'plugins'
+    });
   };
 
   return User;
