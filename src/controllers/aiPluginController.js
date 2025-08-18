@@ -1,6 +1,7 @@
 // src/controllers/aiPluginController.js
-const { AiPlugin, User, UserPluginAccess } = require('../models');
+const { AiPlugin, User, UserPluginAccess, AiConfig } = require('../models');
 const { Op } = require('sequelize');
+const openaiService = require('../services/ai/openaiService');
 
 // Middleware para verificar se o usuário é um 'owner' (proprietário)
 const checkOwnerRole = (req, res, next) => {
@@ -12,11 +13,26 @@ const checkOwnerRole = (req, res, next) => {
 };
 
 module.exports = {
-
   // CADASTRAR UM NOVO PLUGIN (APENAS PARA OWNER)
   async create(req, res) {
     try {
       const { name, description, imageUrl, endpointUrl, enabledGlobally } = req.body;
+
+      // NOVO: Verificação de plugin já existente pelo nome ou endpointUrl
+      const existingPlugin = await AiPlugin.findOne({
+        where: {
+          [Op.or]: [{ name }, { endpointUrl }]
+        }
+      });
+
+      if (existingPlugin) {
+        if (existingPlugin.name === name) {
+          return res.status(400).json({ error: 'Um plugin com este nome já existe.' });
+        }
+        if (existingPlugin.endpointUrl === endpointUrl) {
+          return res.status(400).json({ error: 'Um plugin com este URL de endpoint já existe.' });
+        }
+      }
 
       const newPlugin = await AiPlugin.create({
         name,
@@ -35,7 +51,6 @@ module.exports = {
       return res.status(500).json({ error: 'Erro ao criar plugin de IA' });
     }
   },
-
   // LISTAR TODOS OS PLUGINS (APENAS PARA OWNER)
   async listAll(req, res) {
     try {
@@ -43,7 +58,6 @@ module.exports = {
         attributes: ['id', 'guid', 'name', 'description', 'imageUrl', 'endpointUrl', 'enabledGlobally'],
         order: [['createdAt', 'DESC']]
       });
-
       return res.json({ plugins });
     } catch (error) {
       console.error(error);
@@ -56,21 +70,16 @@ module.exports = {
     try {
       const { guid } = req.params;
       const { name, description, imageUrl, endpointUrl, enabledGlobally } = req.body;
-
       const plugin = await AiPlugin.findOne({ where: { guid } });
-
       if (!plugin) {
         return res.status(404).json({ error: 'Plugin não encontrado' });
       }
-
       if (name !== undefined) plugin.name = name;
       if (description !== undefined) plugin.description = description;
       if (imageUrl !== undefined) plugin.imageUrl = imageUrl;
       if (endpointUrl !== undefined) plugin.endpointUrl = endpointUrl;
       if (enabledGlobally !== undefined) plugin.enabledGlobally = enabledGlobally;
-
       await plugin.save();
-
       return res.json({ message: 'Plugin atualizado com sucesso', plugin });
     } catch (error) {
       console.error(error);
@@ -82,13 +91,20 @@ module.exports = {
   async delete(req, res) {
     try {
       const { guid } = req.params;
-
       const plugin = await AiPlugin.findOne({ where: { guid } });
 
       if (!plugin) {
         return res.status(404).json({ error: 'Plugin não encontrado' });
       }
 
+      // NOVO: Excluir todos os registros de acesso associados primeiro
+      await UserPluginAccess.destroy({
+        where: {
+          aiPluginId: plugin.id
+        }
+      });
+
+      // Agora o plugin pode ser deletado
       await plugin.destroy();
 
       return res.json({ message: 'Plugin deletado com sucesso' });
@@ -102,21 +118,15 @@ module.exports = {
   async setAccess(req, res) {
     try {
       const { guid } = req.params;
-      const { userIds } = req.body; // Array de IDs de usuários
-
+      const { userIds } = req.body;
       const plugin = await AiPlugin.findOne({ where: { guid } });
       if (!plugin) {
         return res.status(404).json({ error: 'Plugin não encontrado' });
       }
-      
       if (plugin.enabledGlobally) {
         return res.status(400).json({ error: 'Este plugin está habilitado globalmente. Desative-o antes de gerenciar o acesso individual.' });
       }
-      
-      // Limpa os acessos existentes
       await UserPluginAccess.destroy({ where: { aiPluginId: plugin.id } });
-      
-      // Cria novos acessos
       if (userIds && userIds.length > 0) {
         const accessEntries = userIds.map(userId => ({
           userId,
@@ -124,7 +134,6 @@ module.exports = {
         }));
         await UserPluginAccess.bulkCreate(accessEntries);
       }
-
       return res.json({ message: 'Acesso ao plugin atualizado com sucesso.' });
     } catch (error) {
       console.error(error);
@@ -136,27 +145,28 @@ module.exports = {
   async getAvailablePlugins(req, res) {
     try {
       const userId = req.user.id;
-
-      // Encontra todos os plugins habilitados globalmente ou com acesso específico para o usuário
-      const plugins = await AiPlugin.findAll({
-        where: {
-          [Op.or]: [
-            { enabledGlobally: true },
-            { '$users.id$': userId }
-          ]
-        },
+      // Busca os plugins habilitados globalmente
+      const globalPlugins = await AiPlugin.findAll({
+        where: { enabledGlobally: true },
+        attributes: ['id', 'guid', 'name', 'description', 'imageUrl', 'endpointUrl'],
+      });
+      // Busca os plugins com acesso específico para o usuário
+      const userSpecificPlugins = await AiPlugin.findAll({
+        attributes: ['id', 'guid', 'name', 'description', 'imageUrl', 'endpointUrl'],
         include: [{
           model: User,
           as: 'users',
-          through: { attributes: [] }, // Evita que a tabela de junção seja incluída
-          attributes: []
+          through: { attributes: [] },
+          where: { id: userId },
         }],
-        attributes: ['id', 'guid', 'name', 'description', 'imageUrl', 'endpointUrl'],
-        order: [['createdAt', 'ASC']]
       });
-
-      return res.json({ plugins });
-
+      // Combina os dois resultados, removendo duplicatas
+      const allAvailablePlugins = [...globalPlugins, ...userSpecificPlugins];
+      const uniquePlugins = Array.from(new Set(allAvailablePlugins.map(p => p.guid)))
+        .map(guid => {
+          return allAvailablePlugins.find(p => p.guid === guid);
+        });
+      return res.json({ plugins: uniquePlugins });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: 'Erro ao buscar plugins disponíveis' });
@@ -167,43 +177,86 @@ module.exports = {
   checkPluginAccess: async (req, res, next) => {
     try {
       const userId = req.user.id;
+      const { guid } = req.body;
+      if (!guid) {
+        return res.status(400).json({ error: 'GUID do plugin é obrigatório no corpo da requisição.' });
+      }
+      // Busca o plugin pelo GUID
+      const plugin = await AiPlugin.findOne({ where: { guid } });
+      if (!plugin) {
+        return res.status(404).json({ error: 'Plugin não encontrado.' });
+      }
+      // Verifica se o plugin está habilitado globalmente
+      if (plugin.enabledGlobally) {
+        req.plugin = plugin;
+        return next();
+      }
+      // Se não for global, verifica o acesso específico do usuário
+      const hasAccess = await UserPluginAccess.findOne({
+        where: {
+          userId,
+          aiPluginId: plugin.id
+        }
+      });
+      if (hasAccess) {
+        req.plugin = plugin;
+        next();
+      } else {
+        return res.status(403).json({ error: 'Acesso negado. Você não tem permissão para usar este plugin.' });
+      }
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Erro ao verificar acesso ao plugin' });
+    }
+  },
+
+  // LÓGICA DE EXECUÇÃO DO PLUGIN "GERAR JSON DE AVALIAÇÕES"
+  async generateReviewJson(req, res) {
+    try {
+      const userId = req.user.id;
+      const { prompt } = req.body;
+      const aiConfig = await AiConfig.findOne({
+        where: {
+          userId,
+          provider: 'openai',
+          isActive: true,
+        },
+      });
+      if (!aiConfig) {
+        return res.status(400).json({ error: 'Nenhuma chave de API da OpenAI ativa encontrada para o seu usuário.' });
+      }
+      const responseJson = await openaiService.generateReviewJson(aiConfig.apiKey, prompt);
+      return res.json({
+        message: 'JSON de avaliação gerado com sucesso.',
+        result: responseJson
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Erro ao executar o plugin de geração de JSON. Verifique sua chave de API e o prompt.' });
+    }
+  },
+
+  async listAccessUsers(req, res) {
+    try {
       const { guid } = req.params;
 
-      const plugin = await AiPlugin.findOne({
-        where: { guid },
-        include: [{
-          model: User,
-          as: 'users',
-          through: { attributes: [] },
-          where: { id: userId },
-          required: false, // Use required: false para LEFT JOIN
-        }]
-      });
-
+      const plugin = await AiPlugin.findOne({ where: { guid } });
       if (!plugin) {
         return res.status(404).json({ error: 'Plugin não encontrado.' });
       }
 
-      // Se o plugin estiver habilitado globalmente, ou se houver uma entrada na tabela de acesso
-      const hasAccess = plugin.enabledGlobally || plugin.users.length > 0;
-      
-      if (hasAccess) {
-        req.plugin = plugin; // Adiciona o plugin ao objeto da requisição para uso posterior
-        next();
-      } else {
-        res.status(403).json({ error: 'Acesso negado. Você não tem permissão para usar este plugin.' });
-      }
+      const accesses = await UserPluginAccess.findAll({
+        where: { aiPluginId: plugin.id },
+        attributes: ['userId']
+      });
+
+      const userIds = accesses.map(access => access.userId);
+      return res.json({ userIds });
 
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Erro ao verificar acesso ao plugin' });
+      return res.status(500).json({ error: 'Erro ao listar usuários com acesso ao plugin.' });
     }
-  },
-
-  // Exemplo de uma função de execução de plugin (será implementada na Etapa 3)
-  async executePluginExample(req, res) {
-    // Lógica aqui na Etapa 3
-    return res.json({ message: `Executando o plugin: ${req.plugin.name}` });
   },
 
   // Exportar o middleware para uso nas rotas

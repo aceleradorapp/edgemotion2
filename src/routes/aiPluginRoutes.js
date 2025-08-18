@@ -9,6 +9,7 @@ const checkOwnerRole = aiPluginController.checkOwnerRole;
 
 // Rota para listar plugins disponíveis para o usuário autenticado
 router.get('/ai/plugins', authenticateToken, aiPluginController.getAvailablePlugins);
+router.get('/ai/plugins/:guid/access', authenticateToken, checkOwnerRole, aiPluginController.listAccessUsers);
 
 // Rotas exclusivas para o 'owner'
 router.post('/ai/plugins', authenticateToken, checkOwnerRole, aiPluginController.create);
@@ -19,6 +20,7 @@ router.put('/ai/plugins/:guid/access', authenticateToken, checkOwnerRole, aiPlug
 
 // Exemplo de rota de execução de um plugin
 // Esta rota usará o middleware 'checkPluginAccess' que criamos no controlador
-router.post('/ai/plugins/execute/:guid', authenticateToken, aiPluginController.checkPluginAccess, aiPluginController.executePluginExample);
+//router.post('/ai/plugins/execute/:guid', authenticateToken, aiPluginController.checkPluginAccess, aiPluginController.executePluginExample);
+router.post('/ai/plugins/generate-review-json', authenticateToken, aiPluginController.checkPluginAccess, aiPluginController.generateReviewJson);
 
 module.exports = router;
