@@ -12,12 +12,8 @@ info:
 servers:
   - url: http://localhost:3030/api
     description: Servidor Local de Desenvolvimento
-  - url: http://192.188.12.22:3030/api
-    description: Servidor Homologação
   - url: https://hub.api.edgemotion.com.br/api
     description: Servidor de Produção (Exemplo)
-  - url: http://192.95.13.27:3030/api
-    description: Servidor de Teste (Exemplo)
 
 tags:
   - name: Autenticação
