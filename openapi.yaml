@@ -1,49 +1,49 @@
 openapi: 3.0.0
 info:
-  title: EdgeMotion 2.0 API  .             
+  title: EdgeMotion 2.0 API - Documentação Completa
   version: 2.0.0
   description: |
     - Dev: Michael Milanez.
 
     Esta API permite a gestão completa de projetos, ferramentas, resultados, participantes, grupos e links compartilhados para a plataforma EdgeMotion 2.0.
     Também inclui rotas para autenticação de usuários, gestão de tipos de usuário e perfis.
-    
+
     A autenticação é feita via Bearer Token (JWT) para a maioria das rotas de gestão, enquanto algumas rotas públicas (como login e acesso a links compartilhados) não exigem autenticação.
 servers:
   - url: http://localhost:3030/api
     description: Servidor Local de Desenvolvimento
   - url: http://192.188.12.22:3030/api
-    description: Servidor Homologação  
+    description: Servidor Homologação
+  - url: https://hub.api.edgemotion.com.br/api
+    description: Servidor de Produção (Exemplo)
+  - url: http://192.95.13.27:3030/api
+    description: Servidor de Teste (Exemplo)
 
 tags:
   - name: Autenticação
     description: Rotas para registro e login de usuários.
-  - name: Dashboard e Admin
-    description: Rotas de acesso ao dashboard e área administrativa.
-  - name: Tipos de Usuário
-    description: Gerenciamento de tipos de usuário (ex: Desenvolvedor, Administrador).
-  - name: Perfis de Usuário
-    description: Gerenciamento de perfis de usuário.
-  - name: Projetos
-    description: Operações relacionadas à gestão de projetos.
-  - name: Ferramentas
-    description: Gerenciamento de ferramentas (quizzes, apresentações, etc.) dentro dos projetos.
-  - name: Resultados das Ferramentas
-    description: Registro e consulta de resultados de ferramentas por participantes.
-  - name: Participantes
-    description: Gerenciamento de participantes (usuários registrados ou visitantes) em projetos.
-  - name: Grupos
-    description: Criação e listagem de grupos dentro dos projetos.
-  - name: Participantes de Grupo
-    description: Gerenciamento da associação de usuários a grupos.
+  - name: Usuários e Perfis
+    description: Gerenciamento de usuários da empresa, tipos de usuário e perfis.
+  - name: Projetos e Ferramentas
+    description: Operações relacionadas à gestão de projetos e ferramentas dentro deles.
+  - name: Avaliações
+    description: Gerenciamento de avaliações, perguntas, respostas e resultados.
+  - name: Participantes e Atribuições
+    description: Gerenciamento de participantes em projetos e atribuição de avaliações.
+  - name: Grupos e Participantes de Grupo
+    description: Criação e listagem de grupos e seus participantes.
   - name: Links Compartilhados
     description: Criação e acesso a links públicos para projetos.
-  - name: Uploads
-    description: Uploads de arquivos.
-  - name: Components
-    description: Componentes.
-  - name: Component Categories
-    description: Component-categories de arquivos.
+  - name: Uploads e Arquivos
+    description: Upload de arquivos de usuário, projeto e dados de ferramenta (JSON).
+  - name: Mensagens
+    description: Criação e gerenciamento de mensagens entre usuários.
+  - name: Itens de Menu
+    description: Gerenciamento de itens de menu da aplicação.
+  - name: Configurações e Plugins de IA
+    description: Rotas para gerenciar configurações e plugins de inteligência artificial.
+  - name: Pacotes e Áudios
+    description: Rotas para lidar com pacotes de projetos e geração de áudios.
 
 components:
   securitySchemes:
@@ -54,6 +54,104 @@ components:
       description: |
         Autenticação via token JWT. Inclua o token no cabeçalho 'Authorization' como 'Bearer <YOUR_TOKEN>'.
   schemas:
+    UserRegister:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: O endereço de e-mail do novo usuário.
+        password:
+          type: string
+          description: A senha do novo usuário.
+        displayName:
+          type: string
+          description: O nome de exibição do novo usuário.
+      required:
+        - email
+        - password
+        - displayName
+    UserLogin:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: O endereço de e-mail do usuário para login.
+        password:
+          type: string
+          description: A senha do usuário para login.
+      required:
+        - email
+        - password
+    UserCompany:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: O endereço de e-mail do novo usuário.
+        password:
+          type: string
+          description: A senha do novo usuário.
+        displayName:
+          type: string
+          description: O nome de exibição do novo usuário.
+        photoUrl:
+          type: string
+          nullable: true
+          description: URL da foto de perfil do usuário.
+      required:
+        - email
+        - password
+        - displayName
+    UserUpdate:
+      type: object
+      properties:
+        displayName:
+          type: string
+          nullable: true
+        photoUrl:
+          type: string
+          nullable: true
+        userTypeId:
+          type: integer
+          nullable: true
+        profileId:
+          type: integer
+          nullable: true
+    UserType:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: O código único para o tipo de usuário.
+        name:
+          type: string
+          description: O nome do tipo de usuário (ex: "Administrador", "Aluno").
+        description:
+          type: string
+          description: Uma descrição detalhada do tipo de usuário e suas permissões.
+      required:
+        - code
+        - name
+        - description
+    Profile:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: O código único para o perfil de usuário.
+        name:
+          type: string
+          description: O nome do perfil (ex: "Gerente de Projeto", "Instrutor").
+        description:
+          type: string
+          description: Uma descrição detalhada do perfil e suas responsabilidades.
+      required:
+        - code
+        - name
+        - description
     Project:
       type: object
       properties:
@@ -63,6 +161,10 @@ components:
         description:
           type: string
           description: Uma descrição detalhada do projeto.
+        imageUrl:
+          type: string
+          nullable: true
+          description: A URL da imagem do projeto.
       required:
         - name
         - description
@@ -86,7 +188,10 @@ components:
           type: string
           format: url
           description: A URL para os dados da ferramenta (ex: o JSON das perguntas do quiz).
-        order:
+        routePage:
+          type: string
+          nullable: true
+        orderNumber:
           type: integer
           description: A ordem de exibição da ferramenta dentro do projeto.
       required:
@@ -95,7 +200,7 @@ components:
         - title
         - description
         - dataUrl
-        - order
+        - orderNumber
     ToolResult:
       type: object
       properties:
@@ -119,12 +224,9 @@ components:
           description: A duração em segundos que o participante levou para completar a ferramenta.
         answers:
           type: object
+          description: Um objeto JSON contendo as respostas dadas pelo participante.
           additionalProperties:
             type: string
-          description: Um objeto JSON contendo as respostas dadas pelo participante.
-          example:
-            pergunta1: "A"
-            pergunta2: "B"
       required:
         - toolInstanceId
         - participantId
@@ -132,6 +234,86 @@ components:
         - completedAt
         - duration
         - answers
+    Evaluation:
+      type: object
+      properties:
+        name:
+          type: string
+          description: O nome da avaliação.
+        description:
+          type: string
+          description: Uma descrição detalhada da avaliação.
+        passingPercentage:
+          type: number
+          format: float
+          description: A porcentagem mínima de acertos para a avaliação ser considerada como "passada".
+        maxAttempts:
+          type: integer
+          description: O número máximo de tentativas permitidas para a avaliação.
+        companyGuid:
+          type: string
+          format: uuid
+          description: O GUID da empresa à qual a avaliação pertence.
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/EvaluationQuestion'
+      required:
+        - name
+        - description
+        - passingPercentage
+        - companyGuid
+        - questions
+    EvaluationQuestion:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [true_false, multiple_choice_single, multiple_choice_multiple]
+          description: O tipo de pergunta da avaliação.
+        text:
+          type: string
+          description: O texto da pergunta.
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/EvaluationQuestionOption'
+      required:
+        - type
+        - text
+        - options
+    EvaluationQuestionOption:
+      type: object
+      properties:
+        text:
+          type: string
+          description: O texto da opção de resposta.
+        isCorrect:
+          type: boolean
+          description: Indica se a opção é a resposta correta.
+      required:
+        - text
+        - isCorrect
+    AnswerRequest:
+      type: object
+      properties:
+        questionGuid:
+          type: string
+          format: uuid
+          description: O GUID da pergunta sendo respondida.
+        selectedOptions:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Uma lista de GUIDs das opções selecionadas pelo usuário.
+        timeTaken:
+          type: integer
+          description: O tempo em segundos que o usuário levou para responder.
+      required:
+        - questionGuid
+        - selectedOptions
+        - timeTaken
     Participant:
       type: object
       description: Representa um participante que pode ser um usuário registrado ou um visitante.
@@ -151,8 +333,6 @@ components:
       oneOf:
         - required: [projectId, userId]
         - required: [projectId, guestEmail]
-      discriminator:
-        propertyName: type # Not explicitly defined in your JSON, but useful for oneOf
     ParticipantStatusUpdate:
       type: object
       properties:
@@ -200,83 +380,279 @@ components:
           type: integer
           format: int64
           description: O ID do projeto para o qual o link de compartilhamento será gerado.
+        userId:
+          type: integer
+          format: int64
+          description: O ID do usuário que gerou o link.
+        keyword:
+          type: string
+          description: Uma palavra-chave para o link.
         expiresAt:
           type: string
           format: date-time
           description: A data e hora de expiração do link compartilhado.
       required:
         - projectId
+        - userId
+        - keyword
         - expiresAt
-    UserRegister:
+    SharedLinkUpdate:
       type: object
       properties:
-        email:
+        expiresAt:
           type: string
-          format: email
-          description: O endereço de e-mail do novo usuário.
-        password:
-          type: string
-          description: A senha do novo usuário.
-        displayName:
-          type: string
-          description: O nome de exibição do novo usuário.
+          format: date-time
       required:
-        - email
-        - password
-        - displayName
-    UserLogin:
+        - expiresAt
+    Assignment:
       type: object
       properties:
-        email:
+        userGuid:
           type: string
-          format: email
-          description: O endereço de e-mail do usuário para login.
-        password:
+          format: uuid
+          description: O GUID do usuário que receberá a avaliação.
+        evaluationGuid:
           type: string
-          description: A senha do usuário para login.
+          format: uuid
+          description: O GUID da avaliação a ser atribuída.
       required:
-        - email
-        - password
-    UserType:
+        - userGuid
+        - evaluationGuid
+    Message:
       type: object
       properties:
-        code:
-          type: integer
-          description: O código único para o tipo de usuário.
+        title:
+          type: string
+        content:
+          type: string
+        recipientIds:
+          type: array
+          items:
+            type: integer
+      required:
+        - title
+        - content
+        - recipientIds
+    MenuItem:
+      type: object
+      properties:
         name:
           type: string
-          description: O nome do tipo de usuário (ex: "Administrador", "Aluno").
-        description:
+        icon:
           type: string
-          description: Uma descrição detalhada do tipo de usuário e suas permissões.
+        type:
+          type: string
+        pathOrAction:
+          type: string
+        highlight:
+          type: boolean
+        position:
+          type: integer
+        minUserTypeId:
+          type: integer
       required:
-        - code
         - name
-        - description
-    Profile:
+        - icon
+        - type
+        - pathOrAction
+        - highlight
+        - position
+        - minUserTypeId
+    Component:
       type: object
       properties:
-        code:
+        identifier:
+          type: string
+        title:
+          type: string
+        icon:
+          type: string
+        category:
+          type: string
+        index:
           type: integer
-          description: O código único para o perfil de usuário.
+        route:
+          type: string
+        userTypeId:
+          type: string
+        categoryId:
+          type: integer
+      required:
+        - identifier
+        - title
+        - icon
+        - category
+        - index
+        - route
+        - userTypeId
+        - categoryId
+    ComponentUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        icon:
+          type: string
+        index:
+          type: integer
+      required:
+        - title
+        - icon
+        - index
+    ComponentCategory:
+      type: object
+      properties:
         name:
           type: string
-          description: O nome do perfil (ex: "Gerente de Projeto", "Instrutor").
+      required:
+        - name
+    AIConfig:
+      type: object
+      properties:
+        provider:
+          type: string
+        apiKey:
+          type: string
+      required:
+        - provider
+        - apiKey
+    AIPlugin:
+      type: object
+      properties:
+        name:
+          type: string
         description:
           type: string
-          description: Uma descrição detalhada do perfil e suas responsabilidades.
+        imageUrl:
+          type: string
+        endpointUrl:
+          type: string
+        enabledGlobally:
+          type: boolean
       required:
-        - code
         - name
         - description
+        - imageUrl
+        - endpointUrl
+        - enabledGlobally
+    AIPluginAccess:
+      type: object
+      properties:
+        userIds:
+          type: array
+          items:
+            type: integer
+      required:
+        - userIds
+    AudioGeneration:
+      type: object
+      properties:
+        folderName:
+          type: string
+        sceneNumber:
+          type: integer
+        text:
+          type: string
+      required:
+        - folderName
+        - sceneNumber
+        - text
+    AudioDelete:
+      type: object
+      properties:
+        folderName:
+          type: string
+        sceneNumber:
+          type: integer
+      required:
+        - folderName
+        - sceneNumber
+    PackageJson:
+      type: object
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+        description:
+          type: string
+      required:
+        - name
+        - version
+        - description
+    SavePackageJson:
+      type: object
+      properties:
+        folderName:
+          type: string
+        packageJson:
+          $ref: '#/components/schemas/PackageJson'
+      required:
+        - folderName
+        - packageJson
 
 paths:
+  /auth/register:
+    post:
+      tags:
+        - Autenticação
+      summary: Registra um novo usuário
+      description: Cria um novo usuário na plataforma com nome, email e senha.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegister'
+            example:
+              email: "michael.elointer@gmail.com"
+              password: "123456"
+              displayName: "Michael"
+      responses:
+        '201':
+          description: Usuário registrado com sucesso.
+        '400':
+          description: Requisição inválida.
+  /auth/login:
+    post:
+      tags:
+        - Autenticação
+      summary: Realiza o login do usuário
+      description: Autentica o usuário e retorna um token JWT para acesso às rotas protegidas.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+            example:
+              email: "michael@example.com.br"
+              password: "12345678"
+      responses:
+        '200':
+          description: Login bem-sucedido. Retorna o token.
+        '401':
+          description: Credenciais inválidas.
+  /auth/me:
+    get:
+      tags:
+        - Autenticação
+      summary: Obtém informações do usuário autenticado
+      description: Retorna os detalhes do usuário associado ao token JWT fornecido.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Detalhes do usuário obtidos com sucesso.
+        '401':
+          description: Não autorizado - token ausente ou inválido.
+
   /projects:
     post:
       tags:
-        - Projetos
+        - Projetos e Ferramentas
       summary: Criar um novo projeto
-      description: Permite a criação de um novo projeto na plataforma, definindo seu nome e descrição.
+      description: Permite a criação de um novo projeto na plataforma.
       security:
         - bearerAuth: []
       requestBody:
@@ -286,75 +662,61 @@ paths:
             schema:
               $ref: '#/components/schemas/Project'
             example:
-              name: "Projeto de Treinamento 2"
-              description: "Projeto com quizzes e apresentações 2"
+              name: "Treinamento EdgeMotion Code"
+              description: "Aprendendo a usar o EdgeMotion Code nível 1"
       responses:
         '201':
-          description: Projeto criado com sucesso. Retorna os detalhes do projeto criado.
+          description: Projeto criado com sucesso.
+        '400':
+          description: Requisição inválida - dados do projeto ausentes ou incorretos.
         '401':
           description: Não autorizado - Token JWT ausente ou inválido.
-        '400':
-          description: Requisição inválida - Dados do projeto ausentes ou incorretos.
     get:
       tags:
-        - Projetos
+        - Projetos e Ferramentas
       summary: Listar todos os projetos
-      description: Retorna uma lista de todos os projetos disponíveis para o usuário autenticado.
+      description: Lista todos os projetos da plataforma.
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Lista de projetos retornada com sucesso.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Project'
+          description: Lista de projetos obtida com sucesso.
         '401':
           description: Não autorizado - Token JWT ausente ou inválido.
   /projects/{id}:
     get:
       tags:
-        - Projetos
-      summary: Obter detalhes de um projeto por ID
-      description: Retorna os detalhes de um projeto específico utilizando seu ID.
+        - Projetos e Ferramentas
+      summary: Obter detalhes de um projeto
+      description: Retorna os detalhes de um projeto específico pelo seu ID.
       security:
         - bearerAuth: []
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
+          required: true
           schema:
             type: integer
-            format: int64
-          required: true
-          description: ID do projeto a ser recuperado.
+          description: O ID do projeto.
       responses:
         '200':
-          description: Detalhes do projeto.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Project'
+          description: Detalhes do projeto obtidos com sucesso.
         '404':
-          description: Projeto não encontrado com o ID fornecido.
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
+          description: Projeto não encontrado.
     put:
       tags:
-        - Projetos
-      summary: Atualizar um projeto por ID
-      description: Atualiza as informações de um projeto existente (nome e descrição) utilizando seu ID.
+        - Projetos e Ferramentas
+      summary: Atualizar um projeto
+      description: Atualiza os dados de um projeto existente pelo seu ID.
       security:
         - bearerAuth: []
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
+          required: true
           schema:
             type: integer
-            format: int64
-          required: true
-          description: ID do projeto a ser atualizado.
+          description: O ID do projeto a ser atualizado.
       requestBody:
         required: true
         content:
@@ -366,42 +728,52 @@ paths:
               description: "Descrição atualizada do projeto"
       responses:
         '200':
-          description: Projeto atualizado com sucesso. Retorna os detalhes atualizados.
-        '404':
-          description: Projeto não encontrado com o ID fornecido.
+          description: Projeto atualizado com sucesso.
+        '400':
+          description: Requisição inválida.
         '401':
           description: Não autorizado - Token JWT ausente ou inválido.
-        '400':
-          description: Requisição inválida - Dados de atualização ausentes ou incorretos.
+        '404':
+          description: Projeto não encontrado.
     delete:
       tags:
-        - Projetos
-      summary: Deletar um projeto por ID
-      description: Remove um projeto permanentemente utilizando seu ID.
+        - Projetos e Ferramentas
+      summary: Excluir um projeto
+      description: Exclui um projeto e todas as suas ferramentas e dados associados.
       security:
         - bearerAuth: []
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
+          required: true
           schema:
             type: integer
-            format: int64
-          required: true
-          description: ID do projeto a ser deletado.
+          description: O ID do projeto a ser excluído.
       responses:
         '204':
-          description: Projeto deletado com sucesso. Nenhuma resposta de conteúdo.
-        '404':
-          description: Projeto não encontrado com o ID fornecido.
+          description: Projeto excluído com sucesso.
         '401':
           description: Não autorizado - Token JWT ausente ou inválido.
+        '404':
+          description: Projeto não encontrado.
+  /projects/showAll:
+    get:
+      tags:
+        - Projetos e Ferramentas
+      summary: Listar todos os projetos (sem paginação)
+      description: Retorna uma lista completa de todos os projetos na plataforma.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista completa de projetos obtida.
 
   /tools:
     post:
       tags:
-        - Ferramentas
+        - Projetos e Ferramentas
       summary: Criar uma nova ferramenta
-      description: Adiciona uma nova ferramenta (ex: quiz, apresentação) a um projeto específico.
+      description: Cria uma nova ferramenta (ex: quiz) associada a um projeto.
       security:
         - bearerAuth: []
       requestBody:
@@ -411,221 +783,230 @@ paths:
             schema:
               $ref: '#/components/schemas/Tool'
             example:
-              projectId: 1
+              projectId: 11
               toolType: "quiz-alternativas"
               title: "Quiz de Exemplo"
               description: "Quiz com perguntas de múltiplas escolhas"
               dataUrl: "https://meuarquivo.com/dados/quiz1"
-              order: 1
+              routePage: null
+              orderNumber: 5
       responses:
         '201':
-          description: Ferramenta criada com sucesso. Retorna os detalhes da ferramenta criada.
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
+          description: Ferramenta criada com sucesso.
         '400':
-          description: Requisição inválida - Dados da ferramenta ausentes ou incorretos.
+          description: Requisição inválida.
     get:
       tags:
-        - Ferramentas
-      summary: Listar todas as ferramentas de um usuário
-      description: Retorna uma lista de todas as ferramentas associadas aos projetos do usuário autenticado.
+        - Projetos e Ferramentas
+      summary: Listar todas as ferramentas do usuário
+      description: Retorna uma lista de todas as ferramentas criadas pelo usuário autenticado.
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Lista de ferramentas retornada com sucesso.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Tool'
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-
-  /tools/project/{projectId}:
+          description: Lista de ferramentas obtida com sucesso.
+  /tools/{id}:
     get:
       tags:
-        - Ferramentas
-      summary: Listar ferramentas por ID de projeto
-      description: Retorna todas as ferramentas pertencentes a um projeto específico, identificado pelo seu ID.
+        - Projetos e Ferramentas
+      summary: Obter detalhes de uma ferramenta por ID
+      description: Retorna os detalhes de uma ferramenta específica.
       security:
         - bearerAuth: []
       parameters:
-        - in: path
-          name: projectId
+        - name: id
+          in: path
+          required: true
           schema:
             type: integer
-            format: int64
-          required: true
-          description: O ID do projeto cujas ferramentas serão listadas.
+          description: O ID da ferramenta.
       responses:
         '200':
-          description: Lista de ferramentas para o projeto especificado.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Tool'
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
+          description: Detalhes da ferramenta obtidos com sucesso.
         '404':
-          description: Projeto não encontrado ou sem ferramentas associadas.
-
-  /tools/{id}:
+          description: Ferramenta não encontrada.
     put:
       tags:
-        - Ferramentas
-      summary: Atualizar uma ferramenta por ID
-      description: Atualiza as informações de uma ferramenta existente (tipo, título, descrição, URL de dados, ordem) utilizando seu ID.
+        - Projetos e Ferramentas
+      summary: Atualizar uma ferramenta
+      description: Atualiza os dados de uma ferramenta existente.
       security:
         - bearerAuth: []
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
+          required: true
           schema:
             type: integer
-            format: int64
-          required: true
-          description: ID da ferramenta a ser atualizada.
+          description: O ID da ferramenta a ser atualizada.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Tool'
-            example:
-              toolType: "drag-drop"
-              title: "Quiz Atualizado"
-              description: "Novo quiz com interação de arrastar e soltar"
-              dataUrl: "https://meuarquivo.com/dados/quiz2"
-              order: 2
       responses:
         '200':
-          description: Ferramenta atualizada com sucesso. Retorna os detalhes atualizados.
-        '404':
-          description: Ferramenta não encontrada com o ID fornecido.
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
+          description: Ferramenta atualizada com sucesso.
         '400':
-          description: Requisição inválida - Dados de atualização ausentes ou incorretos.
+          description: Requisição inválida.
+        '404':
+          description: Ferramenta não encontrada.
     delete:
       tags:
-        - Ferramentas
-      summary: Deletar uma ferramenta por ID
-      description: Remove uma ferramenta permanentemente utilizando seu ID.
+        - Projetos e Ferramentas
+      summary: Excluir uma ferramenta
+      description: Exclui uma ferramenta específica.
       security:
         - bearerAuth: []
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
+          required: true
           schema:
             type: integer
-            format: int64
-          required: true
-          description: ID da ferramenta a ser deletada.
+          description: O ID da ferramenta a ser excluída.
       responses:
         '204':
-          description: Ferramenta deletada com sucesso. Nenhuma resposta de conteúdo.
+          description: Ferramenta excluída com sucesso.
         '404':
-          description: Ferramenta não encontrada com o ID fornecido.
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
+          description: Ferramenta não encontrada.
+  /tools/{id}/data:
+    get:
+      tags:
+        - Uploads e Arquivos
+      summary: Obter dados JSON de uma ferramenta
+      description: Retorna o arquivo JSON associado a uma ferramenta pelo seu ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: O ID da ferramenta.
+      responses:
+        '200':
+          description: Dados JSON da ferramenta obtidos com sucesso.
+        '404':
+          description: Ferramenta ou dados não encontrados.
+    delete:
+      tags:
+        - Uploads e Arquivos
+      summary: Excluir dados JSON de uma ferramenta
+      description: Exclui o arquivo JSON associado a uma ferramenta.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: O ID da ferramenta.
+      responses:
+        '204':
+          description: Dados JSON excluídos com sucesso.
+  /tools/project/{projectId}:
+    get:
+      tags:
+        - Projetos e Ferramentas
+      summary: Listar ferramentas por projeto
+      description: Retorna todas as ferramentas que pertencem a um projeto específico.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: O ID do projeto.
+      responses:
+        '200':
+          description: Lista de ferramentas obtida com sucesso.
+        '404':
+          description: Projeto não encontrado.
+  /tools/project/getLink/{projectId}:
+    get:
+      tags:
+        - Projetos e Ferramentas
+      summary: Listar ferramentas de um projeto por link público
+      description: Retorna as ferramentas de um projeto a partir de um link compartilhado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: O ID do projeto.
+      responses:
+        '200':
+          description: Lista de ferramentas obtida com sucesso.
+        '404':
+          description: Projeto não encontrado.
 
   /results:
     post:
       tags:
-        - Resultados das Ferramentas
-      summary: Criar um novo resultado de ferramenta
-      description: Registra um resultado de uma ferramenta para um participante específico.
+        - Avaliações
+      summary: Registrar um resultado de ferramenta
+      description: Cria um novo registro de resultado para uma ferramenta e um participante.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/ToolResult'
-            example:
-              toolInstanceId: 1
-              participantId: 1
-              score: 95
-              completedAt: "2025-05-22T14:00:00Z"
-              duration: 180
-              answers:
-                pergunta1: "A"
-                pergunta2: "B"
       responses:
         '201':
           description: Resultado criado com sucesso.
-        '400':
-          description: Requisição inválida - Dados do resultado ausentes ou incorretos.
-
-  /results/tool/{toolInstanceId}:
+  /results/tool/{id}:
     get:
       tags:
-        - Resultados das Ferramentas
-      summary: Encontrar resultados de uma ferramenta específica
-      description: Retorna todos os resultados registrados para uma determinada instância de ferramenta.
+        - Avaliações
+      summary: Obter resultados de uma ferramenta
+      description: Retorna todos os resultados de uma ferramenta específica.
       security:
         - bearerAuth: []
       parameters:
-        - in: path
-          name: toolInstanceId
+        - name: id
+          in: path
+          required: true
           schema:
             type: integer
-            format: int64
-          required: true
-          description: ID da instância da ferramenta.
+          description: O ID da ferramenta.
       responses:
         '200':
-          description: Lista de resultados para a ferramenta especificada.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ToolResult'
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-        '404':
-          description: Instância da ferramenta não encontrada ou sem resultados.
-
-  /results/participant/{participantId}:
+          description: Resultados obtidos com sucesso.
+  /results/participant/{id}:
     get:
       tags:
-        - Resultados das Ferramentas
-      summary: Encontrar resultados de um participante específico
-      description: Retorna todos os resultados de ferramentas para um participante específico.
+        - Avaliações
+      summary: Obter resultados de um participante
+      description: Retorna todos os resultados de um participante específico.
       security:
         - bearerAuth: []
       parameters:
-        - in: path
-          name: participantId
+        - name: id
+          in: path
+          required: true
           schema:
             type: integer
-            format: int64
-          required: true
-          description: ID do participante.
+          description: O ID do participante.
       responses:
         '200':
-          description: Lista de resultados para o participante especificado.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ToolResult'
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-        '404':
-          description: Participante não encontrado ou sem resultados.
+          description: Resultados obtidos com sucesso.
 
   /participants:
     post:
       tags:
-        - Participantes
-      summary: Criar um novo participante (usuário ou visitante)
-      description: Cria um novo participante para um projeto, que pode ser um usuário já registrado ou um visitante (guest) com e-mail.
+        - Participantes e Atribuições
+      summary: Criar um participante
+      description: Associa um usuário existente a um projeto, ou cria um participante visitante.
       security:
         - bearerAuth: []
       requestBody:
@@ -634,118 +1015,112 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Participant'
-            examples:
-              userParticipant:
-                summary: Participante Usuário
-                value:
-                  projectId: 1
-                  userId: 1
-              guestParticipant:
-                summary: Participante Visitante
-                value:
-                  projectId: 1
-                  guestEmail: "convidadoundefined" # Exemplo de email de visitante
       responses:
         '201':
           description: Participante criado com sucesso.
         '400':
-          description: Requisição inválida - Dados do participante ausentes ou incorretos.
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-
+          description: Requisição inválida.
   /participants/project/{projectId}:
     get:
       tags:
-        - Participantes
+        - Participantes e Atribuições
       summary: Listar participantes de um projeto
-      description: Retorna uma lista de todos os participantes (usuários e visitantes) associados a um projeto específico.
+      description: Retorna a lista de participantes de um projeto específico.
       security:
         - bearerAuth: []
       parameters:
-        - in: path
-          name: projectId
+        - name: projectId
+          in: path
+          required: true
           schema:
             type: integer
-            format: int64
-          required: true
-          description: ID do projeto cujos participantes serão listados.
+          description: O ID do projeto.
       responses:
         '200':
-          description: Lista de participantes do projeto.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Participant'
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-        '404':
-          description: Projeto não encontrado ou sem participantes associados.
-
+          description: Lista de participantes obtida com sucesso.
   /participants/{id}/status:
     put:
       tags:
-        - Participantes
+        - Participantes e Atribuições
       summary: Atualizar o status de um participante
-      description: Atualiza o status de um participante (ex: para "finalizado") utilizando seu ID.
+      description: Atualiza o status (finalizado, ativo, pendente) de um participante.
       security:
         - bearerAuth: []
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
+          required: true
           schema:
             type: integer
-            format: int64
-          required: true
-          description: ID do participante a ter o status atualizado.
+          description: O ID do participante.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/ParticipantStatusUpdate'
-            example:
-              status: "finalizado"
       responses:
         '200':
-          description: Status do participante atualizado com sucesso.
-        '404':
-          description: Participante não encontrado com o ID fornecido.
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-        '400':
-          description: Requisição inválida - Status ausente ou incorreto.
-
+          description: Status atualizado com sucesso.
   /participants/token/{token}:
     get:
       tags:
-        - Participantes
+        - Participantes e Atribuições
       summary: Listar participante por token
-      description: Retorna os detalhes de um participante utilizando seu token de acesso. Esta rota é pública.
+      description: Retorna um participante a partir de um token.
       parameters:
-        - in: path
-          name: token
+        - name: token
+          in: path
+          required: true
           schema:
             type: string
-          required: true
           description: O token do participante.
       responses:
         '200':
-          description: Detalhes do participante.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Participant' # Assumindo que retorna a mesma estrutura de um participante
-        '404':
-          description: Token não encontrado ou inválido.
+          description: Participante obtido com sucesso.
+  /participants/projec-user/{userId}:
+    get:
+      tags:
+        - Participantes e Atribuições
+      summary: Listar participante por usuário
+      description: Retorna a lista de participantes associados a um usuário específico.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: O ID do usuário.
+      responses:
+        '200':
+          description: Lista de participantes obtida com sucesso.
+  /participants/{id}/delete:
+    delete:
+      tags:
+        - Participantes e Atribuições
+      summary: Excluir um participante
+      description: Exclui um participante de um projeto.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: O ID do participante a ser excluído.
+      responses:
+        '204':
+          description: Participante excluído com sucesso.
 
   /groups:
     post:
       tags:
-        - Grupos
+        - Grupos e Participantes de Grupo
       summary: Criar um novo grupo
-      description: Cria um novo grupo dentro de um projeto específico, com nome e descrição.
+      description: Cria um grupo dentro de um projeto.
       security:
         - bearerAuth: []
       requestBody:
@@ -761,47 +1136,76 @@ paths:
       responses:
         '201':
           description: Grupo criado com sucesso.
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-        '400':
-          description: Requisição inválida - Dados do grupo ausentes ou incorretos.
-
   /groups/project/{projectId}:
     get:
       tags:
-        - Grupos
+        - Grupos e Participantes de Grupo
       summary: Listar grupos de um projeto
-      description: Retorna uma lista de todos os grupos pertencentes a um projeto específico.
+      description: Retorna todos os grupos de um projeto específico.
       security:
         - bearerAuth: []
       parameters:
-        - in: path
-          name: projectId
+        - name: projectId
+          in: path
+          required: true
           schema:
             type: integer
-            format: int64
-          required: true
-          description: ID do projeto cujos grupos serão listados.
+          description: O ID do projeto.
       responses:
         '200':
-          description: Lista de grupos do projeto.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Group'
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-        '404':
-          description: Projeto não encontrado ou sem grupos associados.
+          description: Lista de grupos obtida com sucesso.
+  /groups/{id}:
+    put:
+      tags:
+        - Grupos e Participantes de Grupo
+      summary: Atualizar um grupo
+      description: Atualiza os dados de um grupo existente.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: O ID do grupo.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+            example:
+              name: "Grupo A Atualizado"
+              description: "Descrição atualizada"
+      responses:
+        '200':
+          description: Grupo atualizado com sucesso.
+  /groups/delete/{id}:
+    delete:
+      tags:
+        - Grupos e Participantes de Grupo
+      summary: Excluir um grupo
+      description: Exclui um grupo específico.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: O ID do grupo a ser excluído.
+      responses:
+        '204':
+          description: Grupo excluído com sucesso.
 
   /group-participants:
     post:
       tags:
-        - Participantes de Grupo
-      summary: Adicionar usuário a um grupo
-      description: Associa um usuário a um grupo existente.
+        - Grupos e Participantes de Grupo
+      summary: Adicionar um usuário a um grupo
+      description: Adiciona um usuário a um grupo específico.
       security:
         - bearerAuth: []
       requestBody:
@@ -811,59 +1215,74 @@ paths:
             schema:
               $ref: '#/components/schemas/GroupParticipant'
             example:
-              groupId: 1
-              userId: 1
+              groupId: 2
+              userId: 5
       responses:
         '201':
           description: Usuário adicionado ao grupo com sucesso.
-        '400':
-          description: Requisição inválida - IDs de grupo/usuário ausentes ou incorretos.
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-
+    put:
+      tags:
+        - Grupos e Participantes de Grupo
+      summary: Atualizar status de participante de grupo (não utilizado, mas presente no Insomnia)
+      description: Atualiza o status de um participante de grupo (o schema original não tem o ID do participante).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [approved]
+      responses:
+        '200':
+          description: Status atualizado com sucesso.
   /group-participants/{groupId}:
     get:
       tags:
-        - Participantes de Grupo
-      summary: Listar participantes para um grupo
-      description: Retorna uma lista de todos os usuários que são membros de um grupo específico.
+        - Grupos e Participantes de Grupo
+      summary: Listar participantes de um grupo
+      description: Retorna a lista de todos os participantes de um grupo.
       security:
         - bearerAuth: []
       parameters:
-        - in: path
-          name: groupId
+        - name: groupId
+          in: path
+          required: true
           schema:
             type: integer
-            format: int64
-          required: true
-          description: ID do grupo cujos participantes serão listados.
+          description: O ID do grupo.
       responses:
         '200':
-          description: Lista de participantes para o grupo especificado.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object # Pode ser uma estrutura mais simples, ou a própria User
-                  properties:
-                    id:
-                      type: integer
-                    email:
-                      type: string
-                    displayName:
-                      type: string
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-        '404':
-          description: Grupo não encontrado ou sem participantes associados.
+          description: Lista de participantes obtida com sucesso.
+  /group-participants/delete/{id}:
+    delete:
+      tags:
+        - Grupos e Participantes de Grupo
+      summary: Excluir um participante de grupo
+      description: Exclui um participante de um grupo.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: O ID do participante do grupo.
+      responses:
+        '204':
+          description: Participante excluído do grupo com sucesso.
 
   /shared-links:
     post:
       tags:
         - Links Compartilhados
-      summary: Criar um novo link compartilhado
-      description: Gera um link público para um projeto, permitindo acesso sem autenticação até a data de expiração.
+      summary: Criar um link compartilhado
+      description: Cria um link público para um projeto com uma palavra-chave e data de expiração.
       security:
         - bearerAuth: []
       requestBody:
@@ -873,509 +1292,166 @@ paths:
             schema:
               $ref: '#/components/schemas/SharedLink'
             example:
-              projectId: 1
+              projectId: 28
+              userId: 8
+              keyword: "midia01"
               expiresAt: "2025-12-31T23:59:59Z"
       responses:
         '201':
-          description: Link compartilhado criado com sucesso. Retorna o token do link.
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-        '400':
-          description: Requisição inválida - Dados do link ausentes ou incorretos.
-
-  /shared-links/{token}:
+          description: Link criado com sucesso.
     get:
       tags:
         - Links Compartilhados
-      summary: Acessar um link público compartilhado
-      description: Permite o acesso a um projeto ou recurso através de um link compartilhado, sem necessidade de autenticação.
+      summary: Listar todos os links compartilhados
+      description: Retorna uma lista de todos os links compartilhados.
+      responses:
+        '200':
+          description: Lista de links obtida com sucesso.
+  /shared-links/guid/{guid}:
+    get:
+      tags:
+        - Links Compartilhados
+      summary: Obter link por GUID
+      description: Retorna os detalhes de um link compartilhado a partir de seu GUID.
       parameters:
-        - in: path
-          name: token
+        - name: guid
+          in: path
+          required: true
           schema:
             type: string
-          required: true
-          description: O token único do link compartilhado.
+            format: uuid
+          description: O GUID do link.
       responses:
         '200':
-          description: Conteúdo do link compartilhado (ex: detalhes do projeto e ferramentas).
-        '404':
-          description: Link não encontrado, expirado ou inválido.
-
-  /auth/register:
-    post:
-      tags:
-        - Autenticação
-      summary: Registrar um novo usuário
-      description: Cria uma nova conta de usuário no sistema.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserRegister'
-            example:
-              email: "michael@example.com.br"
-              password: "123456"
-              displayName: "Michael"
-      responses:
-        '201':
-          description: Usuário registrado com sucesso.
-        '400':
-          description: Dados de registro inválidos (ex: e-mail já em uso, senha fraca).
-
-  /auth/login:
-    post:
-      tags:
-        - Autenticação
-      summary: Logar um usuário e obter token
-      description: Autentica um usuário e retorna um token JWT para acesso a rotas protegidas.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserLogin'
-            example:
-              email: "michael@example.com.br"
-              password: "123456"
-      responses:
-        '200':
-          description: Login bem-sucedido, retorna o token JWT.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-                    description: Token JWT para autenticação.
-        '401':
-          description: Credenciais inválidas (e-mail ou senha incorretos).
-
-  /dashboard:
+          description: Detalhes do link obtidos.
+  /shared-links/{code}:
     get:
       tags:
-        - Dashboard e Admin
-      summary: Acessar o dashboard
-      description: Retorna dados e estatísticas para exibição no dashboard do usuário autenticado.
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Dados do dashboard retornados com sucesso.
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-
-  /admin-area:
-    get:
-      tags:
-        - Dashboard e Admin
-      summary: Acessar a área de administração
-      description: Retorna dados e funcionalidades específicas para usuários com perfil de administrador.
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Dados da área de administração retornados com sucesso.
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-        '403':
-          description: Acesso proibido - O usuário não tem permissões de administrador.
-
-  /auth/me:
-    get:
-      tags:
-        - Autenticação
-      summary: Obter informações do usuário logado
-      description: Retorna os detalhes do perfil do usuário atualmente autenticado.
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Informações do usuário retornadas com sucesso.
-          content:
-            application/json:
-              schema:
-                type: object # Substituir por schema de usuário real se disponível
-                properties:
-                  id:
-                    type: integer
-                  email:
-                    type: string
-                  displayName:
-                    type: string
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-
-  /user-types:
-    post:
-      tags:
-        - Tipos de Usuário
-      summary: Criar um novo tipo de usuário
-      description: Adiciona uma nova categoria de tipo de usuário com um código, nome e descrição.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserType'
-            example:
-              code: 10
-              name: "Develop_2"
-              description: "Acesso ao sistema"
-      responses:
-        '201':
-          description: Tipo de usuário criado com sucesso.
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-        '400':
-          description: Requisição inválida - Dados do tipo de usuário ausentes ou incorretos.
-    get:
-      tags:
-        - Tipos de Usuário
-      summary: Listar todos os tipos de usuário
-      description: Retorna uma lista de todos os tipos de usuário registrados no sistema.
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Lista de tipos de usuário retornada com sucesso.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/UserType'
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-
-  /user-types/{id}:
-    get:
-      tags:
-        - Tipos de Usuário
-      summary: Obter tipo de usuário por ID
-      description: Retorna os detalhes de um tipo de usuário específico utilizando seu ID.
-      security:
-        - bearerAuth: []
+        - Links Compartilhados
+      summary: Obter link por código
+      description: Retorna os detalhes de um link compartilhado a partir de seu código.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-            format: int64
+        - name: code
+          in: path
           required: true
-          description: ID do tipo de usuário a ser recuperado.
+          schema:
+            type: string
+          description: O código do link.
       responses:
         '200':
-          description: Detalhes do tipo de usuário.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserType'
-        '404':
-          description: Tipo de usuário não encontrado com o ID fornecido.
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
+          description: Detalhes do link obtidos.
+  /shared-links/{guid}/expires-at:
     put:
       tags:
-        - Tipos de Usuário
-      summary: Atualizar tipo de usuário por ID
-      description: Atualiza as informações (código, nome, descrição) de um tipo de usuário existente utilizando seu ID.
+        - Links Compartilhados
+      summary: Atualizar data de expiração do link
+      description: Atualiza a data de expiração de um link compartilhado.
       security:
         - bearerAuth: []
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-            format: int64
+        - name: guid
+          in: path
           required: true
-          description: ID do tipo de usuário a ser atualizado.
+          schema:
+            type: string
+            format: uuid
+          description: O GUID do link.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserType'
-            example:
-              code: 10
-              name: "Develop_2"
-              description: "Acesso ao sistema"
+              $ref: '#/components/schemas/SharedLinkUpdate'
       responses:
         '200':
-          description: Tipo de usuário atualizado com sucesso.
-        '404':
-          description: Tipo de usuário não encontrado com o ID fornecido.
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-        '400':
-          description: Requisição inválida - Dados de atualização ausentes ou incorretos.
-    delete:
-      tags:
-        - Tipos de Usuário
-      summary: Deletar tipo de usuário por ID
-      description: Remove um tipo de usuário permanentemente utilizando seu ID.
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-            format: int64
-          required: true
-          description: ID do tipo de usuário a ser deletado.
-      responses:
-        '204':
-          description: Tipo de usuário deletado com sucesso. Nenhuma resposta de conteúdo.
-        '404':
-          description: Tipo de usuário não encontrado com o ID fornecido.
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
+          description: Data de expiração atualizada.
 
-  /profiles:
+  /upload/user:
     post:
       tags:
-        - Perfis de Usuário
-      summary: Criar um novo perfil de usuário
-      description: Adiciona um novo perfil de usuário com um código, nome e descrição.
+        - Uploads e Arquivos
+      summary: Fazer upload de imagem de usuário
+      description: Faz o upload de uma imagem para o perfil do usuário.
       security:
         - bearerAuth: []
       requestBody:
         required: true
         content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Profile'
-            example:
-              code: 10
-              name: "Develop_2"
-              description: "Acesso ao sistema"
-      responses:
-        '201':
-          description: Perfil de usuário criado com sucesso.
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-        '400':
-          description: Requisição inválida - Dados do perfil ausentes ou incorretos.
-    get:
-      tags:
-        - Perfis de Usuário
-      summary: Listar todos os perfis de usuário
-      description: Retorna uma lista de todos os perfis de usuário registrados no sistema.
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Lista de perfis de usuário retornada com sucesso.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Profile'
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-
-  /profiles/{id}:
-    get:
-      tags:
-        - Perfis de Usuário
-      summary: Obter perfil de usuário por ID
-      description: Retorna os detalhes de um perfil de usuário específico utilizando seu ID.
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-            format: int64
-          required: true
-          description: ID do perfil de usuário a ser recuperado.
-      responses:
-        '200':
-          description: Detalhes do perfil de usuário.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Profile'
-        '404':
-          description: Perfil de usuário não encontrado com o ID fornecido.
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-    put:
-      tags:
-        - Perfis de Usuário
-      summary: Atualizar perfil de usuário por ID
-      description: Atualiza as informações (código, nome, descrição) de um perfil de usuário existente utilizando seu ID.
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-            format: int64
-          required: true
-          description: ID do perfil de usuário a ser atualizado.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Profile'
-            example:
-              code: 10
-              name: "Develop_2"
-              description: "Acesso ao sistema"
-      responses:
-        '200':
-          description: Perfil de usuário atualizado com sucesso.
-        '404':
-          description: Perfil de usuário não encontrado com o ID fornecido.
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-        '400':
-          description: Requisição inválida - Dados de atualização ausentes ou incorretos.
-    delete:
-      tags:
-        - Perfis de Usuário
-      summary: Deletar perfil de usuário por ID
-      description: Remove um perfil de usuário permanentemente utilizando seu ID.
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-            format: int64
-          required: true
-          description: ID do perfil de usuário a ser deletado.
-      responses:
-        '204':
-          description: Perfil de usuário deletado com sucesso. Nenhuma resposta de conteúdo.
-        '404':
-          description: Perfil de usuário não encontrado com o ID fornecido.
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-  /upload/user: # O caminho da sua rota de upload
-    post:
-      tags:
-        - Uploads # Uma nova tag para organizar as operações de upload
-      summary: Upload de imagem de perfil de usuário
-      description: Faz o upload de uma imagem para o perfil de um usuário. Suporta arquivos JPG/JPEG, PNG e outros formatos de imagem.
-      security:
-        - bearerAuth: [] # Supondo que esta rota também requer autenticação
-      requestBody:
-        required: true
-        content:
-          multipart/form-data: # O tipo de conteúdo para upload de arquivos
+          multipart/form-data:
             schema:
               type: object
               properties:
-                image: # O nome do campo do formulário que conterá o arquivo
+                image:
                   type: string
-                  format: binary # Indica que é um arquivo binário
-                  description: O arquivo de imagem a ser enviado (JPG, PNG, etc.).
-            encoding:
-              image:
-                contentType: image/jpeg, image/png # Você pode especificar os tipos de mídia aceitos
+                  format: binary
+                  description: O arquivo de imagem.
       responses:
-        '200':
-          description: Upload realizado com sucesso.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Upload successful!"
-                  filePath:
-                    type: string
-                    example: "/uploads/users/profile_123.jpg" # Exemplo do caminho onde o arquivo foi salvo
-        '400':
-          description: Requisição inválida (ex: arquivo não fornecido, formato incorreto).
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-        '413':
-          description: Payload muito grande - Arquivo excede o tamanho máximo permitido.
+        '201':
+          description: Imagem do usuário carregada com sucesso.
   /upload/user/images:
     get:
       tags:
-        - Uploads
-      summary: Lista as imagens de perfil do usuário
-      description: Retorna a lista de imagens armazenadas na pasta de uploads do usuário autenticado.
+        - Uploads e Arquivos
+      summary: Listar imagens do usuário
+      description: Retorna uma lista das imagens de perfil do usuário.
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Lista de imagens retornada com sucesso.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  images:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        name:
-                          type: string
-                          example: "1749647625433-509039295.png"
-                        url:
-                          type: string
-                          example: "/uploads/users/1749647625433-509039295.png"
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-        '500':
-          description: Erro interno ao tentar listar imagens.
+          description: Lista de imagens obtida.
   /upload/user/images/{filename}:
     delete:
       tags:
-        - Uploads
-      summary: Remove uma imagem do usuário
-      description: Deleta uma imagem específica da pasta de uploads do usuário autenticado.
+        - Uploads e Arquivos
+      summary: Excluir imagem do usuário
+      description: Exclui um arquivo de imagem de perfil de usuário pelo nome.
       security:
         - bearerAuth: []
       parameters:
-        - in: path
-          name: filename
+        - name: filename
+          in: path
           required: true
           schema:
             type: string
-          description: Nome do arquivo a ser removido (ex: `1749647625433-509039295.png`)
+          description: O nome do arquivo de imagem a ser excluído.
       responses:
-        '200':
-          description: Imagem deletada com sucesso.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Imagem deletada com sucesso."
-        '401':
-          description: Não autorizado - Token JWT ausente ou inválido.
-        '404':
-          description: Imagem não encontrada.
-        '500':
-          description: Erro interno ao tentar deletar a imagem.
-
-
-  /components:
+        '204':
+          description: Imagem do usuário excluída com sucesso.
+  /upload/project:
     post:
       tags:
-        - Components
-      summary: Cria um novo componente
-      description: Adiciona um novo componente ao sistema com base nos dados fornecidos.
+        - Uploads e Arquivos
+      summary: Fazer upload de imagem de projeto
+      description: Faz o upload de uma imagem para um projeto, especificado por ID no query param.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: projectId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: O ID do projeto.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: O arquivo de imagem.
+      responses:
+        '201':
+          description: Imagem do projeto carregada com sucesso.
+  /upload/tool-json:
+    post:
+      tags:
+        - Uploads e Arquivos
+      summary: Fazer upload de dados JSON de ferramenta
+      description: Faz o upload de um arquivo JSON para uma ferramenta.
       security:
         - bearerAuth: []
       requestBody:
@@ -1384,145 +1460,175 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                - identifier
-                - title
-                - icon
-                - category
-                - index
-                - route
-                - categoryId
               properties:
-                identifier:
-                  type: string
-                  example: "correct_alternatives"
-                title:
-                  type: string
-                  example: "Alternativas"
-                icon:
-                  type: string
-                  example: "ListChecks"
-                category:
-                  type: string
-                  example: "Testes"
-                index:
+                toolId:
                   type: integer
-                  example: 0
-                route:
-                  type: string
-                  example: "/testes/alternativas"
-                userTypeId:
-                  type: string
-                  example: "all"
-                categoryId:
-                  type: integer
-                  example: 1
+                jsonData:
+                  type: object
       responses:
         '201':
-          description: Componente criado com sucesso.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: integer
-                    example: 1
-                  guid:
-                    type: string
-                    example: "cf1bced1-fb39-4f94-9fdd-dfe209273478"
-                  identifier:
-                    type: string
-                    example: "correct_alternatives"
-                  title:
-                    type: string
-                    example: "Alternativas"
-                  icon:
-                    type: string
-                    example: "ListChecks"
-                  category:
-                    type: string
-                    example: "Testes"
-                  index:
-                    type: integer
-                    example: 0
-                  route:
-                    type: string
-                    example: "/testes/alternativas"
-                  userTypeId:
-                    type: string
-                    example: "all"
-                  categoryId:
-                    type: integer
-                    example: 1
-        '400':
-          description: Requisição inválida.
-        '401':
-          description: Não autorizado.
-        '500':
-          description: Erro interno ao criar componente.
+          description: Dados JSON da ferramenta carregados com sucesso.
 
+  /component-categories:
+    post:
+      tags:
+        - Component Categories
+      summary: Criar uma categoria de componente
+      description: Cria uma nova categoria para agrupar componentes.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComponentCategory'
+      responses:
+        '201':
+          description: Categoria criada com sucesso.
     get:
       tags:
-        - Components
-      summary: Lista todos os componentes
+        - Component Categories
+      summary: Listar categorias e seus componentes
+      description: Retorna uma lista de todas as categorias de componentes e os componentes associados a cada uma.
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Lista de componentes retornada com sucesso.
-        '401':
-          description: Não autorizado.
-        '500':
-          description: Erro interno.
+          description: Lista de categorias e componentes obtida.
+  /component-categories/listCategory:
+    get:
+      tags:
+        - Component Categories
+      summary: Listar apenas as categorias
+      description: Retorna uma lista simples de todas as categorias de componentes.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de categorias obtida.
+  /component-categories/{id}:
+    get:
+      tags:
+        - Component Categories
+      summary: Obter detalhes de uma categoria
+      description: Retorna os detalhes de uma categoria específica.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Detalhes da categoria obtidos.
+    put:
+      tags:
+        - Component Categories
+      summary: Atualizar uma categoria
+      description: Atualiza o nome de uma categoria.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComponentCategory'
+      responses:
+        '200':
+          description: Categoria atualizada.
+    delete:
+      tags:
+        - Component Categories
+      summary: Excluir uma categoria
+      description: Exclui uma categoria específica.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Categoria excluída.
 
   /components/map:
     get:
       tags:
         - Components
-      summary: Retorna o mapa das categorias.      
+      summary: Obter mapa de componentes
+      description: Retorna uma estrutura de dados de mapa de componentes.
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Componente mapa retornada com sucesso.
-        '404':
-          description: Componente mapa não encontrada.
-        '401':
-          description: Não autorizado.
-        '500':
-          description: Erro interno.
+          description: Mapa de componentes obtido.
 
+  /components:
+    post:
+      tags:
+        - Components
+      summary: Criar um componente
+      description: Cria um novo componente.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Component'
+      responses:
+        '201':
+          description: Componente criado.
+    get:
+      tags:
+        - Components
+      summary: Listar todos os componentes
+      description: Retorna uma lista de todos os componentes.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de componentes obtida.
   /components/{id}:
     get:
       tags:
         - Components
-      summary: Retorna um componente pelo ID
+      summary: Obter detalhes de um componente
+      description: Retorna os detalhes de um componente específico.
+      security:
+        - bearerAuth: []
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
           required: true
           schema:
             type: integer
-      security:
-        - bearerAuth: []
       responses:
         '200':
-          description: Componente retornado com sucesso.
-        '404':
-          description: Componente não encontrado.
-        '401':
-          description: Não autorizado.
-        '500':
-          description: Erro interno.
-
+          description: Detalhes do componente obtidos.
     put:
       tags:
         - Components
-      summary: Atualiza um componente
+      summary: Atualizar um componente
+      description: Atualiza um componente existente.
+      security:
+        - bearerAuth: []
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
           required: true
           schema:
             type: integer
@@ -1531,63 +1637,35 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                identifier:
-                  type: string
-                title:
-                  type: string
-                icon:
-                  type: string
-                category:
-                  type: string
-                index:
-                  type: integer
-                route:
-                  type: string
-                userTypeId:
-                  type: string
-                categoryId:
-                  type: integer
-      security:
-        - bearerAuth: []
+              $ref: '#/components/schemas/ComponentUpdate'
       responses:
         '200':
           description: Componente atualizado.
-        '404':
-          description: Componente não encontrado.
-        '401':
-          description: Não autorizado.
-        '500':
-          description: Erro interno.
-
     delete:
       tags:
         - Components
-      summary: Remove um componente
+      summary: Excluir um componente
+      description: Exclui um componente.
+      security:
+        - bearerAuth: []
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
           required: true
           schema:
             type: integer
-      security:
-        - bearerAuth: []
       responses:
-        '200':
-          description: Componente deletado com sucesso.
-        '404':
-          description: Componente não encontrado.
-        '401':
-          description: Não autorizado.
-        '500':
-          description: Erro interno.
-  
-  /component-categories:
+        '204':
+          description: Componente excluído.
+
+  /player:
     post:
       tags:
-        - Component Categories
-      summary: Cria uma nova categoria de componente
+        - Player
+      summary: Obter dados do player
+      description: Retorna os dados do player associados a uma palavra-chave.
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -1595,85 +1673,484 @@ paths:
             schema:
               type: object
               properties:
+                keyword:
+                  type: string
+      responses:
+        '200':
+          description: Dados do player obtidos com sucesso.
+
+  /contracted-projects:
+    post:
+      tags:
+        - Projetos e Ferramentas
+      summary: Criar um projeto contratado
+      description: Cria um novo projeto contratado para um usuário.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                imageUrl:
+                  type: string
                 name:
                   type: string
-                index:
-                  type: integer
-                  example: 0  
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Projeto contratado criado com sucesso.
+    get:
+      tags:
+        - Projetos e Ferramentas
+      summary: Listar todos os projetos contratados
+      description: Retorna uma lista de todos os projetos contratados.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de projetos obtida com sucesso.
+  /contracted-projects/{id}:
+    get:
+      tags:
+        - Projetos e Ferramentas
+      summary: Obter projeto contratado por ID
+      description: Retorna os detalhes de um projeto contratado específico.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Detalhes do projeto obtidos.
+    put:
+      tags:
+        - Projetos e Ferramentas
+      summary: Atualizar projeto contratado
+      description: Atualiza os dados de um projeto contratado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Project'
+      responses:
+        '200':
+          description: Projeto atualizado com sucesso.
+    delete:
+      tags:
+        - Projetos e Ferramentas
+      summary: Excluir projeto contratado
+      description: Exclui um projeto contratado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Projeto excluído com sucesso.
+  /contracted-projects/user/{id}:
+    get:
+      tags:
+        - Projetos e Ferramentas
+      summary: Listar projetos contratados por usuário
+      description: Retorna uma lista de projetos contratados por um usuário específico.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de projetos obtida.
+  /contracted-projects/demo:
+    post:
+      tags:
+        - Projetos e Ferramentas
+      summary: Criar projeto de demonstração
+      description: Cria um projeto de demonstração.
       security:
         - bearerAuth: []
       responses:
         '201':
-          description: Categoria criada com sucesso.
-        '401':
-          description: Não autorizado.
-        '500':
-          description: Erro interno.
+          description: Projeto de demonstração criado com sucesso.
 
+  /messages:
+    post:
+      tags:
+        - Mensagens
+      summary: Enviar uma mensagem
+      description: Envia uma nova mensagem para um ou mais destinatários.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Message'
+      responses:
+        '201':
+          description: Mensagem enviada com sucesso.
     get:
       tags:
-        - Component Categories
-      summary: Lista todas as categorias e componentes
+        - Mensagens
+      summary: Obter mensagens recebidas
+      description: Retorna todas as mensagens recebidas pelo usuário autenticado.
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Categorias retornadas com sucesso.
-        '401':
-          description: Não autorizado.
-        '500':
-          description: Erro interno.   
-
-  /component-categories/listCategory:
-    get:
-      tags:
-        - Component Categories
-      summary: Retorna uma categoria de componente por ID      
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Categoria retornada com sucesso.
-        '404':
-          description: Categoria não encontrada.
-        '401':
-          description: Não autorizado.
-        '500':
-          description: Erro interno. 
-
-  /component-categories/{id}:
-    get:
-      tags:
-        - Component Categories
-      summary: Retorna uma categoria e componente por ID
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Categoria retornada com sucesso.
-        '404':
-          description: Categoria não encontrada.
-        '401':
-          description: Não autorizado.
-        '500':
-          description: Erro interno.    
-
+          description: Mensagens recebidas obtidas com sucesso.
+  /messages/{id}/read:
     put:
       tags:
-        - Component Categories
-      summary: Atualiza uma categoria de componente
+        - Mensagens
+      summary: Marcar mensagem como lida
+      description: Marca uma mensagem específica como lida.
+      security:
+        - bearerAuth: []
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
           required: true
           schema:
             type: integer
+      responses:
+        '200':
+          description: Mensagem marcada como lida.
+  /messages/{id}/delete:
+    put:
+      tags:
+        - Mensagens
+      summary: Excluir mensagem (soft delete)
+      description: Exclui uma mensagem "suavemente" (marca como deletada).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Mensagem excluída suavemente.
+    delete:
+      tags:
+        - Mensagens
+      summary: Excluir mensagem (hard delete)
+      description: Exclui uma mensagem de forma definitiva.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Mensagem excluída definitivamente.
+
+  /menu-items:
+    post:
+      tags:
+        - Itens de Menu
+      summary: Criar um item de menu
+      description: Cria um novo item para o menu da aplicação.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuItem'
+      responses:
+        '201':
+          description: Item de menu criado.
+    get:
+      tags:
+        - Itens de Menu
+      summary: Listar todos os itens de menu
+      description: Retorna uma lista de todos os itens de menu.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de itens de menu obtida.
+  /menu-items/{id}:
+    put:
+      tags:
+        - Itens de Menu
+      summary: Atualizar um item de menu
+      description: Atualiza os dados de um item de menu.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuItem'
+      responses:
+        '200':
+          description: Item de menu atualizado.
+  /menu-items/delete/{id}:
+    delete:
+      tags:
+        - Itens de Menu
+      summary: Excluir um item de menu
+      description: Exclui um item de menu específico.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Item de menu excluído.
+  /menu-items/filters:
+    get:
+      tags:
+        - Itens de Menu
+      summary: Listar itens de menu filtrados
+      description: Retorna uma lista de itens de menu com filtros.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de itens filtrada obtida.
+
+  /packages/directories:
+    get:
+      tags:
+        - Pacotes e Áudios
+      summary: Obter lista de pastas de projetos
+      description: Retorna uma lista dos nomes das pastas de projetos no servidor.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de diretórios obtida.
+  /packages/package-json:
+    post:
+      tags:
+        - Pacotes e Áudios
+      summary: Carregar arquivo package.json
+      description: Carrega o conteúdo do arquivo `package.json` de uma pasta de projeto.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                folderName:
+                  type: string
+              required:
+                - folderName
+      responses:
+        '200':
+          description: Arquivo package.json carregado.
+  /packages/save-package-json:
+    post:
+      tags:
+        - Pacotes e Áudios
+      summary: Salvar arquivo package.json
+      description: Salva o conteúdo de um arquivo `package.json` em uma pasta de projeto.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavePackageJson'
+      responses:
+        '201':
+          description: Arquivo salvo com sucesso.
+
+  /audio/generate:
+    post:
+      tags:
+        - Pacotes e Áudios
+      summary: Gerar áudios a partir de texto
+      description: Cria arquivos de áudio a partir de um texto fornecido, para uma pasta e cena específicas.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AudioGeneration'
+      responses:
+        '200':
+          description: Áudios gerados com sucesso.
+  /audio/delete:
+    delete:
+      tags:
+        - Pacotes e Áudios
+      summary: Excluir áudios de uma cena
+      description: Exclui os arquivos de áudio associados a uma cena específica.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AudioDelete'
+      responses:
+        '204':
+          description: Áudios excluídos com sucesso.
+  /packages/audio-files/{folderName}:
+    get:
+      tags:
+        - Pacotes e Áudios
+      summary: Obter lista de áudios por pasta
+      description: Retorna uma lista de arquivos de áudio de uma pasta de projeto.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: folderName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de áudios obtida.
+
+  /evaluations:
+    post:
+      tags:
+        - Avaliações
+      summary: Criar uma nova avaliação
+      description: Cria uma nova avaliação com um conjunto de perguntas e opções.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Evaluation'
+            example:
+              name: "Avaliação de Geografia"
+              description: "Teste seus conhecimentos sobre geografia física e política."
+              passingPercentage: 0.7
+              maxAttempts: 3
+              companyGuid: "bef2e216-4269-42b8-a046-26321f2f27b2"
+              questions:
+                - type: "true_false"
+                  text: "O Brasil é o maior país da América do Sul em território."
+                  options:
+                    - text: "Verdadeiro"
+                      isCorrect: true
+                    - text: "Falso"
+                      isCorrect: false
+      responses:
+        '201':
+          description: Avaliação criada com sucesso.
+        '400':
+          description: Requisição inválida.
+        '401':
+          description: Não autorizado - token inválido.
+    get:
+      tags:
+        - Avaliações
+      summary: Listar avaliações de usuário
+      description: Retorna uma lista de avaliações com opções de paginação e busca.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de avaliações obtida com sucesso.
+  /evaluations/{guid}:
+    get:
+      tags:
+        - Avaliações
+      summary: Obter detalhes de avaliação por GUID
+      description: Retorna os detalhes de uma avaliação específica, incluindo suas perguntas.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: guid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Detalhes da avaliação obtidos.
+        '404':
+          description: Avaliação não encontrada.
+    put:
+      tags:
+        - Avaliações
+      summary: Atualizar avaliação
+      description: Atualiza os dados de uma avaliação.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: guid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -1683,39 +2160,751 @@ paths:
               properties:
                 name:
                   type: string
+                description:
+                  type: string
+                passingPercentage:
+                  type: number
+      responses:
+        '200':
+          description: Avaliação atualizada com sucesso.
+    delete:
+      tags:
+        - Avaliações
+      summary: Excluir avaliação por GUID
+      description: Exclui uma avaliação e todos os seus dados associados.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: guid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Avaliação excluída.
+  /evaluations/{guid}/start:
+    post:
+      tags:
+        - Avaliações
+      summary: Iniciar uma tentativa de avaliação
+      description: Inicia uma nova tentativa para a avaliação especificada pelo GUID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: guid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Avaliação iniciada com sucesso. Retorna o GUID da tentativa.
+        '401':
+          description: Não autorizado.
+        '404':
+          description: Avaliação não encontrada.
+  /evaluations/attempts/{attemptGuid}/answer:
+    post:
+      tags:
+        - Avaliações
+      summary: Enviar respostas para uma avaliação
+      description: Envia as respostas para uma ou mais perguntas de uma tentativa de avaliação em andamento.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: attemptGuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnswerRequest'
+            example:
+              questionGuid: "703d80d5-a435-4af0-bfe9-92e3788c9592"
+              selectedOptions:
+                - "32422479-8b7a-430d-80a9-32e4c1e31e0b"
+                - "bc4d9f64-3283-4403-a247-5c239c273ff1"
+              timeTaken: 20
+      responses:
+        '200':
+          description: Resposta registrada com sucesso.
+        '400':
+          description: Requisição inválida.
+        '401':
+          description: Não autorizado.
+        '404':
+          description: Tentativa de avaliação não encontrada.
+  /evaluations/attempts/{attemptGuid}/finish:
+    post:
+      tags:
+        - Avaliações
+      summary: Finalizar uma avaliação
+      description: Finaliza a tentativa de avaliação e calcula o resultado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: attemptGuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Avaliação finalizada com sucesso. Retorna os resultados.
+        '401':
+          description: Não autorizado.
+        '404':
+          description: Tentativa de avaliação não encontrada.
+  /users/attempts:
+    get:
+      tags:
+        - Avaliações
+      summary: Listar tentativas de avaliação do usuário
+      description: Retorna a lista de todas as tentativas de avaliação do usuário autenticado.
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Categoria atualizada.
-        '404':
-          description: Categoria não encontrada.
+          description: Tentativas de avaliação obtidas.
+  /evaluations/attempts/{attemptGuid}:
+    get:
+      tags:
+        - Avaliações
+      summary: Obter resultados de uma tentativa de avaliação
+      description: Retorna os detalhes e resultados de uma tentativa de avaliação específica.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: attemptGuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Resultados da avaliação obtidos com sucesso.
         '401':
           description: Não autorizado.
-        '500':
-          description: Erro interno.
+        '404':
+          description: Tentativa de avaliação não encontrada.
+  /evaluations/{guid}/ranking:
+    get:
+      tags:
+        - Avaliações
+      summary: Obter ranking de uma avaliação
+      description: Retorna o ranking dos participantes de uma avaliação específica.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: guid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ranking obtido com sucesso.
 
+  /assignments:
+    post:
+      tags:
+        - Participantes e Atribuições
+      summary: Atribuir avaliações a usuários
+      description: Atribui uma ou mais avaliações a um ou mais usuários.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Assignment'
+      responses:
+        '201':
+          description: Avaliações atribuídas com sucesso.
+        '400':
+          description: Requisição inválida.
+  /users/{userGuid}/assignments:
+    get:
+      tags:
+        - Participantes e Atribuições
+      summary: Listar atribuições de um usuário
+      description: Retorna todas as avaliações que foram atribuídas a um usuário específico.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userGuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de atribuições obtida com sucesso.
+  /evaluations/{evaluationGuid}/assigned-users:
+    get:
+      tags:
+        - Participantes e Atribuições
+      summary: Listar usuários atribuídos a uma avaliação
+      description: Retorna a lista de usuários que foram atribuídos a uma avaliação específica.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: evaluationGuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de usuários obtida com sucesso.
+  /assignments/{id}:
     delete:
       tags:
-        - Component Categories
-      summary: Remove uma categoria de componente
+        - Participantes e Atribuições
+      summary: Remover uma atribuição
+      description: Remove uma atribuição de avaliação de um usuário.
+      security:
+        - bearerAuth: []
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Atribuição removida com sucesso.
+
+  /users/company:
+    post:
+      tags:
+        - Usuários e Perfis
+      summary: Criar um novo usuário de empresa
+      description: Permite o registro de um novo usuário associado a uma empresa.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCompany'
+      responses:
+        '201':
+          description: Usuário criado com sucesso.
+        '400':
+          description: Requisição inválida.
+        '401':
+          description: Não autorizado.
+    get:
+      tags:
+        - Usuários e Perfis
+      summary: Listar usuários da empresa
+      description: Lista todos os usuários de uma empresa, com opções de paginação e busca.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de usuários obtida com sucesso.
+  /users/company/{guid}:
+    put:
+      tags:
+        - Usuários e Perfis
+      summary: Atualizar usuário de empresa
+      description: Atualiza os dados de um usuário de empresa.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: guid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: Usuário atualizado com sucesso.
+    delete:
+      tags:
+        - Usuários e Perfis
+      summary: Excluir usuário de empresa por GUID
+      description: Exclui um usuário de empresa pelo seu GUID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: guid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Usuário excluído com sucesso.
+  /users:
+    get:
+      tags:
+        - Usuários e Perfis
+      summary: Listar todos os usuários
+      description: Retorna uma lista de todos os usuários cadastrados.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de usuários obtida.
+  /users/{id}:
+    delete:
+      tags:
+        - Usuários e Perfis
+      summary: Excluir usuário por ID
+      description: Exclui um usuário pelo seu ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
           required: true
           schema:
             type: integer
+      responses:
+        '204':
+          description: Usuário excluído com sucesso.
+    get:
+      tags:
+        - Usuários e Perfis
+      summary: Obter usuário por ID
+      description: Retorna os detalhes de um usuário pelo seu ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Usuário obtido com sucesso.
+
+  /user-types:
+    post:
+      tags:
+        - Usuários e Perfis
+      summary: Criar tipo de usuário
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserType'
+      responses:
+        '201':
+          description: Tipo de usuário criado.
+    get:
+      tags:
+        - Usuários e Perfis
+      summary: Listar tipos de usuário
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Categoria removida com sucesso.
-        '404':
-          description: Categoria não encontrada.
-        '401':
-          description: Não autorizado.
-        '500':
-          description: Erro interno.
+          description: Lista de tipos de usuário obtida.
+  /user-types/{id}:
+    get:
+      tags:
+        - Usuários e Perfis
+      summary: Obter tipo de usuário por ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Tipo de usuário obtido.
+    put:
+      tags:
+        - Usuários e Perfis
+      summary: Atualizar tipo de usuário
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserType'
+      responses:
+        '200':
+          description: Tipo de usuário atualizado.
+    delete:
+      tags:
+        - Usuários e Perfis
+      summary: Excluir tipo de usuário
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Tipo de usuário excluído.
 
-
+  /profiles:
+    get:
+      tags:
+        - Usuários e Perfis
+      summary: Listar perfis de usuário
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de perfis obtida.
+    post:
+      tags:
+        - Usuários e Perfis
+      summary: Criar um perfil de usuário
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+      responses:
+        '201':
+          description: Perfil criado.
+  /profiles/{id}:
+    get:
+      tags:
+        - Usuários e Perfis
+      summary: Obter perfil por ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Perfil obtido.
+    put:
+      tags:
+        - Usuários e Perfis
+      summary: Atualizar perfil
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+      responses:
+        '200':
+          description: Perfil atualizado.
+    delete:
+      tags:
+        - Usuários e Perfis
+      summary: Excluir perfil
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Perfil excluído.
+  /ai/plugins/generate-review-json:
+    post:
+      tags:
+        - Configurações e Plugins de IA
+      summary: Gerar JSON de avaliação via plugin
+      description: Usa um plugin de IA para gerar o JSON de uma avaliação a partir de um prompt.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                guid:
+                  type: string
+                  format: uuid
+                prompt:
+                  type: string
+      responses:
+        '200':
+          description: JSON de avaliação gerado.
+  /ai/configs:
+    post:
+      tags:
+        - Configurações e Plugins de IA
+      summary: Registrar nova configuração de IA
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIConfig'
+      responses:
+        '201':
+          description: Configuração de IA registrada.
+    get:
+      tags:
+        - Configurações e Plugins de IA
+      summary: Listar configurações de IA
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de configurações obtida.
+  /ai/configs/active/{guid}:
+    put:
+      tags:
+        - Configurações e Plugins de IA
+      summary: Definir configuração de IA ativa
+      description: Define uma configuração de IA específica como ativa.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: guid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Configuração ativada.
+  /ai/configs/{guid}:
+    delete:
+      tags:
+        - Configurações e Plugins de IA
+      summary: Excluir configuração de IA
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: guid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Configuração excluída.
+  /ai/plugins:
+    get:
+      tags:
+        - Configurações e Plugins de IA
+      summary: Listar plugins de usuário
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de plugins de usuário obtida.
+    post:
+      tags:
+        - Configurações e Plugins de IA
+      summary: Criar novo plugin de IA
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIPlugin'
+      responses:
+        '201':
+          description: Plugin criado.
+  /ai/plugins/all:
+    get:
+      tags:
+        - Configurações e Plugins de IA
+      summary: Listar todos os plugins de IA
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista completa de plugins obtida.
+  /ai/plugins/{guid}:
+    put:
+      tags:
+        - Configurações e Plugins de IA
+      summary: Atualizar plugin de IA
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: guid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Plugin atualizado.
+    delete:
+      tags:
+        - Configurações e Plugins de IA
+      summary: Excluir plugin de IA
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: guid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Plugin excluído.
+  /ai/plugins/{guid}/access:
+    put:
+      tags:
+        - Configurações e Plugins de IA
+      summary: Atribuir acesso ao plugin
+      description: Atribui um plugin a usuários específicos.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: guid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIPluginAccess'
+      responses:
+        '200':
+          description: Acesso ao plugin atualizado.
+    get:
+      tags:
+        - Configurações e Plugins de IA
+      summary: Listar usuários com acesso ao plugin
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: guid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de usuários com acesso obtida.
+  /ai/plugins/execute/{guid}:
+    post:
+      tags:
+        - Configurações e Plugins de IA
+      summary: Executar plugin de IA
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: guid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Execução do plugin iniciada.
 
