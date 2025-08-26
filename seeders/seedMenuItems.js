@@ -496,6 +496,7 @@ async function seedMenuItems() {
       "updatedAt": "2025-08-15T21:03:40.000Z"
     }
   ]
+  
 
   for (const item of menuItems) {
     await MenuItem.findOrCreate({
