@@ -22,7 +22,8 @@ module.exports = {
         photoUrl,
         userTypeId: 2,
         profileId: 2,
-        companyGuid: req.user.guid
+        companyGuid: req.user.guid,
+        emailVerifiedAt: new Date()
       });
 
       return res.status(201).json({

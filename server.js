@@ -29,6 +29,10 @@ const emailConfigRoutes = require('./src/routes/emailConfigRoutes');
 const publicRoutes = require('./src/routes/publicRoutes');
 const packageRoutes = require('./src/routes/packageRoutes');
 const audioRoutes = require('./src/routes/audioRoutes');
+const evaluationRoutes = require('./src/routes/evaluationRoutes');
+const assignmentRoutes = require('./src/routes/assignmentRoutes'); 
+const aiConfigRoutes = require('./src/routes/aiConfigRoutes');
+const aiPluginRoutes = require('./src/routes/aiPluginRoutes');
 
 
 const swaggerDocument = YAML.load(path.join(__dirname, 'openapi.yaml'));
@@ -66,6 +70,10 @@ app.use('/api/menu-items', menuItemRoutes);
 app.use('/api/email-config', emailConfigRoutes);
 app.use('/api', packageRoutes);
 app.use('/api', audioRoutes);
+app.use('/api', evaluationRoutes);
+app.use('/api', assignmentRoutes);
+app.use('/api', aiConfigRoutes);
+app.use('/api', aiPluginRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // acessar imagem via URL pública
