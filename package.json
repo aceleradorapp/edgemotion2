@@ -10,7 +10,8 @@
     "seed:component-categories": "node seeders/seedComponentCategories.js",
     "seed:components": "node seeders/seedComponents.js",
     "seed:menu-items": "node seeders/seedMenuItemBaseJson.js",
-    "seed:all": "npm run seed:types && npm run seed:profiles && npm run seed:component-categories && npm run seed:components && npm run seed:menu-items"
+    "seed:EmailConfig": "node seeders/EmailConfigSeeder.js",
+    "seed:all": "npm run seed:types && npm run seed:profiles && npm run seed:component-categories && npm run seed:components && npm run seed:menu-items && npm run seed:EmailConfig"
   },
   "keywords": [],
   "author": "",
